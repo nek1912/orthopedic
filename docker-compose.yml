@@ -1,0 +1,20 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: dental-clinic-db
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: dental_dev
+      POSTGRES_PASSWORD: dental_dev_pass
+      POSTGRES_DB: dental_clinic_dev
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U dental_dev -d dental_clinic_dev"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres_data:
