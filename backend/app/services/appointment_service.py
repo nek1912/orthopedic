@@ -1,5 +1,5 @@
 import uuid
-from datetime import date, time
+from datetime import date, datetime, time, timezone
 
 from fastapi import HTTPException
 from sqlalchemy import select
@@ -136,6 +136,9 @@ async def mark_arrived(
         raise HTTPException(status_code=404, detail="Appointment not found")
     if appointment.status != StatusEnum.accepted:
         raise HTTPException(status_code=400, detail="Appointment must be accepted first")
+    appointment.arrived_at = datetime.now(timezone.utc)
+    await db.commit()
+    await db.refresh(appointment, ["patient", "service"])
     return appointment
 
 

@@ -30,6 +30,7 @@ class Appointment(Base):
     time_slot_start: Mapped[time | None] = mapped_column(Time, nullable=True)
     time_slot_end: Mapped[time | None] = mapped_column(Time, nullable=True)
     notes: Mapped[str | None] = mapped_column(Text, nullable=True)
+    arrived_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=datetime.now)
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=datetime.now, onupdate=datetime.now

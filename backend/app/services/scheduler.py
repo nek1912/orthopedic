@@ -32,7 +32,7 @@ async def validate_and_accept(
             Appointment.requested_date == target_date,
             Appointment.status == StatusEnum.accepted,
             Appointment.id != uuid.UUID(appointment_id),
-        )
+        ).with_for_update()
     )
     for a in accepted.scalars().all():
         if a.time_slot_start and a.time_slot_end:

@@ -83,6 +83,7 @@ def upgrade() -> None:
         sa.Column("time_slot_start", sa.Time(), nullable=True),
         sa.Column("time_slot_end", sa.Time(), nullable=True),
         sa.Column("notes", sa.Text(), nullable=True),
+        sa.Column("arrived_at", sa.DateTime(timezone=True), nullable=True),
         sa.Column("created_at", sa.DateTime(timezone=True), nullable=False),
         sa.Column("updated_at", sa.DateTime(timezone=True), nullable=False),
         sa.ForeignKeyConstraint(["patient_id"], ["patients.id"], name="fk_appointments_patient_id"),
