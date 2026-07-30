@@ -1,0 +1,57 @@
+from datetime import date, datetime, time
+
+from pydantic import BaseModel
+
+
+class AppointmentCreate(BaseModel):
+    service_id: str | None = None
+    service_description: str | None = None
+    requested_date: date
+
+
+class AppointmentResponse(BaseModel):
+    id: str
+    patient_id: str
+    patient_name: str
+    service_id: str | None = None
+    service_name: str | None = None
+    service_description: str | None = None
+    requested_date: date
+    status: str
+    rejection_reason: str | None = None
+    suggested_date: date | None = None
+    time_slot_start: time | None = None
+    time_slot_end: time | None = None
+    notes: str | None = None
+    created_at: datetime
+    updated_at: datetime
+
+
+class AppointmentListResponse(BaseModel):
+    appointments: list[AppointmentResponse]
+
+
+class CancelResponse(BaseModel):
+    message: str = "Appointment cancelled"
+
+
+class AdminAppointmentDetail(AppointmentResponse):
+    patient_email: str
+    patient_phone: str | None = None
+
+
+class AcceptRequest(BaseModel):
+    date: date
+    start_time: time
+    end_time: time
+
+
+class RejectRequest(BaseModel):
+    reason: str | None = None
+    suggested_date: date | None = None
+
+
+class AppointmentStats(BaseModel):
+    today_count: int = 0
+    pending_count: int = 0
+    today_appointments: list[AppointmentResponse] = []
