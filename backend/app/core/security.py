@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta, timezone
 
-from fastapi import Depends, HTTPException, Request
+from fastapi import Depends, HTTPException, Request, Response
 from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
 from passlib.context import CryptContext
@@ -65,6 +65,7 @@ async def get_current_patient(
 
 async def get_current_admin(
     request: Request,
+    response: Response,
     db: AsyncSession = Depends(get_db),
 ) -> AdminSettings:
     token = request.cookies.get(settings.ADMIN_COOKIE_NAME)
@@ -80,4 +81,16 @@ async def get_current_admin(
     admin = result.scalar_one_or_none()
     if admin is None:
         raise HTTPException(status_code=401, detail="Admin not found")
+    remember_me = payload.get("remember_me", False)
+    max_age = 30 * 24 * 60 * 60 if remember_me else 24 * 60 * 60
+    new_token = create_admin_token(int(admin_id), remember_me)["access_token"]
+    response.set_cookie(
+        key=settings.ADMIN_COOKIE_NAME,
+        value=new_token,
+        httponly=True,
+        samesite="lax",
+        secure=False,
+        max_age=max_age,
+        path="/",
+    )
     return admin

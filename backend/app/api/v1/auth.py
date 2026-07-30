@@ -1,8 +1,10 @@
 from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db
 from app.core.security import create_access_token, create_refresh_token, decode_token
+from app.models.patient import Patient
 from app.schemas.auth import AuthResponse, LoginRequest, PatientResponse, RefreshRequest, RegisterRequest
 from app.services.auth_service import (
     authenticate_patient,
@@ -74,9 +76,6 @@ async def refresh(request: RefreshRequest, db: AsyncSession = Depends(get_db)):
     patient_id = payload.get("sub")
     if patient_id is None:
         raise HTTPException(status_code=401, detail="Invalid refresh token")
-
-    from app.models.patient import Patient
-    from sqlalchemy import select
 
     result = await db.execute(select(Patient).where(Patient.id == patient_id))
     patient = result.scalar_one_or_none()

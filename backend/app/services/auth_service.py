@@ -72,7 +72,7 @@ def create_admin_token(admin_id: int, remember_me: bool = False) -> dict:
     else:
         expires_delta = timedelta(days=1)
     access_token = create_access_token(
-        data={"sub": str(admin_id), "type": "admin_access"},
+        data={"sub": str(admin_id), "type": "admin_access", "remember_me": remember_me},
         expires_delta=expires_delta,
     )
     return {"access_token": access_token}

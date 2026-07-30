@@ -58,7 +58,7 @@ async def change_password(
     admin: AdminSettings = Depends(get_current_admin),
 ):
     if not verify_password(request.current_password, admin.password_hash):
-        raise HTTPException(status_code=400, detail="Current password is incorrect")
+        raise HTTPException(status_code=401, detail="Current password is incorrect")
 
     admin.password_hash = get_password_hash(request.new_password)
     await db.commit()
