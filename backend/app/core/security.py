@@ -83,6 +83,7 @@ async def get_current_admin(
         raise HTTPException(status_code=401, detail="Admin not found")
     remember_me = payload.get("remember_me", False)
     max_age = 30 * 24 * 60 * 60 if remember_me else 24 * 60 * 60
+    from app.services.auth_service import create_admin_token
     new_token = create_admin_token(int(admin_id), remember_me)["access_token"]
     response.set_cookie(
         key=settings.ADMIN_COOKIE_NAME,
