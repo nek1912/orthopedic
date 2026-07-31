@@ -33,7 +33,7 @@ async def admin_login(
         max_age=max_age,
         path="/",
     )
-    return AdminLoginResponse(message="Login successful")
+    return AdminLoginResponse(message="Login successful", access_token=token_data["access_token"])
 
 
 @router.post("/logout")

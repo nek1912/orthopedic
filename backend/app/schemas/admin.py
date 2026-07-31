@@ -13,3 +13,4 @@ class ChangePasswordRequest(BaseModel):
 
 class AdminLoginResponse(BaseModel):
     message: str = "Login successful"
+    access_token: str

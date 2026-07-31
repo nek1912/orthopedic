@@ -1,9 +1,9 @@
 from datetime import datetime, timedelta, timezone
 
+import bcrypt
 from fastapi import Depends, HTTPException, Request, Response
 from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
-from passlib.context import CryptContext
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -12,16 +12,15 @@ from app.core.database import get_db
 from app.models.admin import AdminSettings
 from app.models.patient import Patient
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login")
 
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
-    return pwd_context.verify(plain_password, hashed_password)
+    return bcrypt.checkpw(plain_password.encode('utf-8'), hashed_password.encode('utf-8'))
 
 
 def get_password_hash(password: str) -> str:
-    return pwd_context.hash(password)
+    return bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
 
 
 def create_access_token(data: dict, expires_delta: timedelta | None = None) -> str:
@@ -70,6 +69,10 @@ async def get_current_admin(
 ) -> AdminSettings:
     token = request.cookies.get(settings.ADMIN_COOKIE_NAME)
     if token is None:
+        auth_header = request.headers.get("Authorization", "")
+        if auth_header.startswith("Bearer "):
+            token = auth_header[7:]
+    if token is None:
         raise HTTPException(status_code=401, detail="Not authenticated")
     payload = decode_token(token)
     if payload is None or payload.get("type") != "admin_access":
@@ -77,7 +80,7 @@ async def get_current_admin(
     admin_id = payload.get("sub")
     if admin_id is None:
         raise HTTPException(status_code=401, detail="Invalid authentication credentials")
-    result = await db.execute(select(AdminSettings).where(AdminSettings.id == admin_id))
+    result = await db.execute(select(AdminSettings).where(AdminSettings.id == int(admin_id)))
     admin = result.scalar_one_or_none()
     if admin is None:
         raise HTTPException(status_code=401, detail="Admin not found")
