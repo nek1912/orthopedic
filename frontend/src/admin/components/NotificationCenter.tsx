@@ -49,7 +49,7 @@ export default function NotificationCenter() {
       setPanelStyle({
         bottom: window.innerHeight - rect.top + 8,
         left: Math.max(8, rect.right - 320),
-        maxHeight: window.innerHeight - 16,
+        maxHeight: Math.max(120, rect.top - 16),
       })
     }
     setOpen(next)
