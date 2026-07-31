@@ -38,7 +38,7 @@ async def create_appointment(
     return appointment
 
 
-async def cancel_appointment(
+async def cancel_patient_appointment(
     db: AsyncSession,
     appointment_id: str,
     patient_id: str,
@@ -158,6 +158,27 @@ async def mark_completed(
         raise HTTPException(status_code=400, detail="Appointment must be accepted first")
 
     appointment.status = StatusEnum.completed
+    await db.commit()
+    await db.refresh(appointment, ["patient", "service"])
+    return appointment
+
+
+async def cancel_appointment(
+    db: AsyncSession,
+    appointment_id: str,
+) -> Appointment:
+    result = await db.execute(
+        select(Appointment)
+        .where(Appointment.id == uuid.UUID(appointment_id))
+        .options(selectinload(Appointment.patient), selectinload(Appointment.service))
+    )
+    appointment = result.scalar_one_or_none()
+    if appointment is None:
+        raise HTTPException(status_code=404, detail="Appointment not found")
+    if appointment.status != StatusEnum.accepted:
+        raise HTTPException(status_code=400, detail="Only accepted appointments can be cancelled")
+
+    appointment.status = StatusEnum.cancelled
     await db.commit()
     await db.refresh(appointment, ["patient", "service"])
     return appointment

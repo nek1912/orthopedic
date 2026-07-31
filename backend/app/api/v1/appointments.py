@@ -97,7 +97,7 @@ async def cancel_appointment(
     db: AsyncSession = Depends(get_db),
     patient: Patient = Depends(get_current_patient),
 ):
-    appt = await svc.cancel_appointment(db, appointment_id, str(patient.id))
+    appt = await svc.cancel_patient_appointment(db, appointment_id, str(patient.id))
     await create_notification(
         db,
         "appointment.cancelled",

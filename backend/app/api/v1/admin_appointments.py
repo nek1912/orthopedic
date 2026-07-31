@@ -142,3 +142,16 @@ async def mark_completed(
         db, "appointment.completed", "appointment", str(appt.id), _appointment_summary(appt)
     )
     return _build_response(appt)
+
+
+@router.patch("/{appointment_id}/cancel", response_model=AppointmentResponse)
+async def cancel_appointment(
+    appointment_id: str,
+    db: AsyncSession = Depends(get_db),
+    admin: AdminSettings = Depends(get_current_admin),
+):
+    appt = await svc.cancel_appointment(db, appointment_id)
+    await log_activity(
+        db, "appointment.cancelled", "appointment", str(appt.id), _appointment_summary(appt)
+    )
+    return _build_response(appt)
