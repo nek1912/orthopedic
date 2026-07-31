@@ -1,5 +1,5 @@
 import calendar
-from datetime import date
+from datetime import date, timedelta
 
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -70,3 +70,29 @@ def _is_unavailable_for_date(
     if u.recurring == RecurringEnum.weekdays:
         return target_date.weekday() < 5
     return False
+
+
+async def get_next_available_day(db: AsyncSession, after_date: date) -> date | None:
+    from app.services.scheduler import _is_unavailable_for_date as is_unavailable
+
+    current = after_date + timedelta(days=1)
+    max_lookahead = after_date + timedelta(days=30)
+
+    while current <= max_lookahead:
+        unavailability_result = await db.execute(select(DoctorUnavailability))
+        unavailable = unavailability_result.scalars().all()
+
+        if not any(is_unavailable(u, current) for u in unavailable):
+            existing = await db.execute(
+                select(func.count(Appointment.id)).where(
+                    Appointment.requested_date == current,
+                    Appointment.status.in_([StatusEnum.accepted, StatusEnum.pending]),
+                )
+            )
+            count = existing.scalar() or 0
+            if count < 8:
+                return current
+
+        current += timedelta(days=1)
+
+    return None

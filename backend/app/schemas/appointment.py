@@ -54,4 +54,7 @@ class RejectRequest(BaseModel):
 class AppointmentStats(BaseModel):
     today_count: int = 0
     pending_count: int = 0
+    total_patients: int = 0
+    completion_rate: float = 0.0
+    next_available_day: str | None = None
     today_appointments: list[AppointmentResponse] = []

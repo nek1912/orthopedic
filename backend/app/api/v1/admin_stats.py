@@ -1,13 +1,17 @@
 from datetime import date
 
 from fastapi import APIRouter, Depends
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db
 from app.core.security import get_current_admin
 from app.models.admin import AdminSettings
+from app.models.appointment import Appointment, StatusEnum
+from app.models.patient import Patient
 from app.schemas.appointment import AppointmentResponse, AppointmentStats
 from app.services import appointment_service as svc
+from app.services.availability_service import get_next_available_day
 
 router = APIRouter(prefix="/admin", tags=["admin-stats"])
 
@@ -40,8 +44,29 @@ async def get_stats(
     today = date.today()
     today_appts = await svc.get_admin_appointments(db, date_=today)
     pending_appts = await svc.get_admin_appointments(db, status="pending")
+
+    total_patients_result = await db.execute(select(func.count(Patient.id)))
+    total_patients = total_patients_result.scalar() or 0
+
+    completed_result = await db.execute(
+        select(func.count(Appointment.id)).where(
+            Appointment.status == StatusEnum.completed
+        )
+    )
+    completed_count = completed_result.scalar() or 0
+
+    total_result = await db.execute(select(func.count(Appointment.id)))
+    total_count = total_result.scalar() or 0
+
+    completion_rate = (completed_count / total_count * 100) if total_count > 0 else 0
+
+    next_day = await get_next_available_day(db, today)
+
     return AppointmentStats(
         today_count=len(today_appts),
         pending_count=len(pending_appts),
+        total_patients=total_patients,
+        completion_rate=round(completion_rate, 1),
+        next_available_day=next_day.isoformat() if next_day else None,
         today_appointments=[_build_response(a) for a in today_appts],
     )
