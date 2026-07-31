@@ -1,0 +1,156 @@
+.row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  background-color: var(--color-surface-elevated);
+  border: 1px solid var(--color-border-light);
+  border-radius: var(--radius-md);
+  transition: border-color var(--duration-fast) var(--ease-out);
+  flex-wrap: wrap;
+}
+
+@media (min-width: 640px) {
+  .row {
+    flex-wrap: nowrap;
+  }
+}
+
+.row:hover {
+  border-color: var(--color-border);
+}
+
+.avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--color-surface-muted) 0%, var(--color-border) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.avatarText {
+  font-family: var(--font-heading);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  color: var(--color-accent);
+}
+
+.info {
+  flex: 1;
+  min-width: 0;
+}
+
+.top {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-1);
+}
+
+.patient {
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  color: var(--color-text);
+  font-family: var(--font-heading);
+}
+
+.meta {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+  flex-wrap: wrap;
+}
+
+.sep {
+  color: var(--color-border);
+}
+
+.time {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  color: var(--color-text-muted);
+}
+
+.timeIcon {
+  width: 12px;
+  height: 12px;
+  opacity: 0.6;
+}
+
+.actions {
+  display: flex;
+  gap: var(--space-2);
+  flex-shrink: 0;
+}
+
+.accept, .reject, .arrive, .complete, .cancel {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 36px;
+  border-radius: var(--radius-sm);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  cursor: pointer;
+  transition: all var(--duration-fast) var(--ease-out);
+  font-family: var(--font-heading);
+}
+
+.accept {
+  width: 36px;
+  background-color: rgba(46, 125, 107, 0.1);
+  color: var(--color-success);
+}
+
+.accept:hover {
+  background-color: var(--color-success);
+  color: #FFFFFF;
+  transform: scale(1.05);
+}
+
+.reject {
+  width: 36px;
+  background-color: rgba(181, 72, 72, 0.1);
+  color: var(--color-danger);
+}
+
+.reject:hover {
+  background-color: var(--color-danger);
+  color: #FFFFFF;
+  transform: scale(1.05);
+}
+
+.arrive, .complete, .cancel {
+  width: auto;
+  padding: 0 var(--space-3);
+  background-color: var(--color-surface-muted);
+  color: var(--color-text-secondary);
+  font-size: var(--text-xs);
+  height: 36px;
+}
+
+.arrive:hover {
+  background-color: var(--color-accent);
+  color: #FFFFFF;
+}
+
+.complete:hover {
+  background-color: var(--color-primary);
+  color: #FFFFFF;
+}
+
+.cancel {
+  border: 1px solid var(--color-danger);
+  color: var(--color-danger);
+}
+
+.cancel:hover {
+  background-color: var(--color-danger);
+  color: #FFFFFF;
+}
