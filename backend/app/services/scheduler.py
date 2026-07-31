@@ -56,7 +56,7 @@ async def validate_and_accept(
     appointment.time_slot_end = end_time
     appointment.requested_date = target_date
     await db.commit()
-    await db.refresh(appointment)
+    await db.refresh(appointment, ["patient", "service"])
     return appointment
 
 

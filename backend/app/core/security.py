@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta, timezone
+import uuid
 
 import bcrypt
 from fastapi import Depends, HTTPException, Request, Response
@@ -55,7 +56,11 @@ async def get_current_patient(
     patient_id = payload.get("sub")
     if patient_id is None:
         raise HTTPException(status_code=401, detail="Invalid authentication credentials")
-    result = await db.execute(select(Patient).where(Patient.id == patient_id))
+    try:
+        uid = uuid.UUID(patient_id)
+    except ValueError:
+        raise HTTPException(status_code=401, detail="Invalid authentication credentials")
+    result = await db.execute(select(Patient).where(Patient.id == uid))
     patient = result.scalar_one_or_none()
     if patient is None:
         raise HTTPException(status_code=401, detail="Patient not found")
