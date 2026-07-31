@@ -75,13 +75,13 @@ export default function AppointmentRow({ appointment, onAccept, onReject, onArri
       {showActions && appointment.status === 'accepted' && (
         <div className={styles.actions}>
           {onArrive && (
-            <button className={styles.arrive} onClick={onArrive}>Arrived</button>
+            <button type="button" className={styles.arrive} onClick={onArrive}>Arrived</button>
           )}
           {onComplete && (
-            <button className={styles.complete} onClick={onComplete}>Complete</button>
+            <button type="button" className={styles.complete} onClick={onComplete}>Complete</button>
           )}
           {onCancel && (
-            <button className={styles.cancel} onClick={onCancel}>Cancel</button>
+            <button type="button" className={styles.cancel} onClick={onCancel}>Cancel</button>
           )}
         </div>
       )}

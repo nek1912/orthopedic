@@ -121,7 +121,7 @@ export default function AdminSchedulePage() {
                 {e.recurring !== 'none' && <span className={styles.entryRecurring}>{e.recurring}</span>}
                 {e.reason && <span className={styles.entryReason}>{e.reason}</span>}
               </div>
-              <button className={styles.deleteBtn} onClick={() => handleDelete(e.id)} title="Delete">&times;</button>
+              <button type="button" className={styles.deleteBtn} onClick={() => handleDelete(e.id)} title="Delete">&times;</button>
             </div>
           ))}
         </div>
