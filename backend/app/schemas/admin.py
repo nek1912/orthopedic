@@ -1,5 +1,7 @@
 from pydantic import BaseModel
 
+from app.schemas.auth import PatientResponse
+
 
 class AdminLoginRequest(BaseModel):
     password: str
@@ -14,3 +16,11 @@ class ChangePasswordRequest(BaseModel):
 class AdminLoginResponse(BaseModel):
     message: str = "Login successful"
     access_token: str
+
+
+class AdminPatientResponse(PatientResponse):
+    total_visits: int = 0
+    last_visit_date: str | None = None
+    pending_count: int = 0
+    completed_count: int = 0
+    prescription_count: int = 0

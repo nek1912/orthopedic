@@ -1,14 +1,17 @@
 import uuid
 
 from fastapi import APIRouter, Depends, HTTPException, Query
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from app.core.database import get_db
 from app.core.security import get_current_admin
 from app.models.admin import AdminSettings
+from app.models.appointment import Appointment, StatusEnum
 from app.models.patient import Patient
+from app.models.prescription import Prescription
+from app.schemas.admin import AdminPatientResponse
 from app.schemas.auth import PatientResponse
 from app.schemas.appointment import AppointmentResponse
 
@@ -25,6 +28,43 @@ def _patient_response(p: Patient) -> PatientResponse:
         dob=p.dob,
         created_at=p.created_at,
     )
+
+
+async def _appointment_count_rows(db: AsyncSession):
+    result = await db.execute(
+        select(
+            Appointment.patient_id,
+            func.count(Appointment.id)
+            .filter(
+                Appointment.status.in_(
+                    [StatusEnum.pending, StatusEnum.accepted, StatusEnum.completed]
+                )
+            )
+            .label("total_visits"),
+            func.count(Appointment.id)
+            .filter(Appointment.status == StatusEnum.pending)
+            .label("pending_count"),
+            func.count(Appointment.id)
+            .filter(Appointment.status == StatusEnum.completed)
+            .label("completed_count"),
+            func.max(Appointment.requested_date)
+            .filter(Appointment.status == StatusEnum.completed)
+            .label("last_visit_date"),
+        ).group_by(Appointment.patient_id)
+    )
+    return result.all()
+
+
+async def _prescription_count_rows(db: AsyncSession):
+    result = await db.execute(
+        select(
+            Appointment.patient_id,
+            func.count(Prescription.id).label("prescription_count"),
+        )
+        .join(Prescription, Prescription.appointment_id == Appointment.id)
+        .group_by(Appointment.patient_id)
+    )
+    return result.all()
 
 
 def _appointment_response(a) -> AppointmentResponse:
@@ -47,7 +87,7 @@ def _appointment_response(a) -> AppointmentResponse:
     )
 
 
-@router.get("", response_model=list[PatientResponse])
+@router.get("", response_model=list[AdminPatientResponse])
 async def list_patients(
     search: str | None = Query(None),
     db: AsyncSession = Depends(get_db),
@@ -59,8 +99,38 @@ async def list_patients(
             Patient.name.ilike(f"%{search}%") | Patient.email.ilike(f"%{search}%")
         )
     query = query.order_by(Patient.created_at.desc())
-    result = await db.execute(query)
-    return [_patient_response(p) for p in result.scalars().all()]
+    patients = (await db.execute(query)).scalars().all()
+
+    total_visits = {}
+    pending_count = {}
+    completed_count = {}
+    last_visit_date = {}
+    for row in await _appointment_count_rows(db):
+        total_visits[row.patient_id] = row.total_visits
+        pending_count[row.patient_id] = row.pending_count
+        completed_count[row.patient_id] = row.completed_count
+        last_visit_date[row.patient_id] = (
+            row.last_visit_date.isoformat() if row.last_visit_date else None
+        )
+
+    prescription_count = {}
+    for row in await _prescription_count_rows(db):
+        prescription_count[row.patient_id] = row.prescription_count
+
+    items = []
+    for p in patients:
+        base = _patient_response(p)
+        items.append(
+            AdminPatientResponse(
+                **base.model_dump(),
+                total_visits=total_visits.get(p.id, 0),
+                last_visit_date=last_visit_date.get(p.id),
+                pending_count=pending_count.get(p.id, 0),
+                completed_count=completed_count.get(p.id, 0),
+                prescription_count=prescription_count.get(p.id, 0),
+            )
+        )
+    return items
 
 
 @router.get("/{patient_id}")
