@@ -1,0 +1,153 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.title {
+  font-family: var(--font-display);
+  font-size: var(--text-2xl);
+  font-weight: 700;
+  color: var(--color-primary);
+}
+
+.utilization {
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.entry {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-3) var(--space-4);
+  background-color: var(--color-surface-elevated);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  gap: var(--space-3);
+}
+
+@media (min-width: 640px) {
+  .entry {
+    flex-wrap: nowrap;
+  }
+}
+
+.entryInfo {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+
+.entryDate {
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.entryTime {
+  font-size: var(--text-xs);
+  color: var(--color-text-secondary);
+}
+
+.entryRecurring {
+  font-size: var(--text-xs);
+  color: var(--color-accent);
+  text-transform: capitalize;
+}
+
+.entryReason {
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+}
+
+.deleteBtn {
+  color: var(--color-danger);
+  font-size: 1.25rem;
+  cursor: pointer;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-sm);
+}
+
+.deleteBtn:hover {
+  background-color: rgba(212, 92, 92, 0.1);
+}
+
+.formBody {
+  padding: var(--space-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.fieldRow {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.fieldRow .field {
+  flex: 1;
+}
+
+.fieldLabel {
+  font-size: var(--text-sm);
+  font-weight: 500;
+  color: var(--color-text);
+}
+
+.fieldInput, .select {
+  height: 40px;
+  padding: 0 var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-size: var(--text-sm);
+  color: var(--color-text);
+  background-color: var(--color-surface-elevated);
+}
+
+.fieldInput:focus, .select:focus {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+.select {
+  cursor: pointer;
+}
+
+.fieldActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-3);
+  padding-top: var(--space-2);
+}
+
+@media (min-width: 640px) {
+  .fieldRow {
+    flex-direction: row;
+  }
+}
