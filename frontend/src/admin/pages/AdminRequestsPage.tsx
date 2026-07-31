@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState, useCallback, useRef } from 'react'
 import { apiRequest, ApiError } from '@shared/api/client'
 import { useToast } from '@shared/context/ToastContext'
 import type { AppointmentResponse, AdminAppointmentDetail } from '@shared/types'
@@ -34,17 +34,27 @@ export default function AdminRequestsPage() {
 
   useEffect(() => { fetchRequests() }, [fetchRequests])
 
+  const selectedIdRef = useRef<string | null>(null)
+
   const selectRequest = useCallback(async (appt: AppointmentResponse) => {
     setSelected(appt)
     setDetail(null)
     setDetailLoading(true)
+    selectedIdRef.current = appt.id
+    const id = appt.id
     try {
-      const data = await apiRequest<AdminAppointmentDetail>(`/api/v1/admin/appointments/${appt.id}`)
+      const data = await apiRequest<AdminAppointmentDetail>(`/api/v1/admin/appointments/${id}`)
+      if (selectedIdRef.current !== id) return
       setDetail(data)
-    } catch {
-      toast('Failed to load request details', 'error')
+    } catch (err) {
+      if (selectedIdRef.current !== id) return
+      if (err instanceof ApiError) {
+        toast(err.detail, 'error')
+      } else {
+        toast('Unable to load request details', 'error')
+      }
     } finally {
-      setDetailLoading(false)
+      if (selectedIdRef.current === id) setDetailLoading(false)
     }
   }, [toast])
 
