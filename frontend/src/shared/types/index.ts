@@ -31,6 +31,10 @@ export interface ServiceResponse {
   id: string
   name: string
   description: string | null
+  duration_minutes: number
+  default_fee: number
+  preparation_notes: string | null
+  requires_followup: boolean
   is_active: boolean
 }
 
