@@ -21,7 +21,7 @@ export default function MoreDrawer({ isOpen, onClose, onLogout }: MoreDrawerProp
       <div className={styles.drawer} onClick={(e) => e.stopPropagation()}>
         <div className={styles.header}>
           <span className={styles.title}>More</span>
-          <button className={styles.closeBtn} onClick={onClose}>
+          <button type="button" aria-label="Close menu" className={styles.closeBtn} onClick={onClose}>
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
               <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
             </svg>
@@ -38,7 +38,7 @@ export default function MoreDrawer({ isOpen, onClose, onLogout }: MoreDrawerProp
               {item.label}
             </NavLink>
           ))}
-          <button className={styles.logoutBtn} onClick={onLogout}>
+          <button type="button" className={styles.logoutBtn} onClick={onLogout}>
             Sign Out
           </button>
         </nav>

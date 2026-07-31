@@ -73,6 +73,7 @@ export default function GlobalSearch() {
   }
 
   function goTo(path: string) {
+    if (debounceTimer.current) clearTimeout(debounceTimer.current)
     navigate(path)
     setQuery('')
     setOpen(false)

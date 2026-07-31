@@ -68,15 +68,13 @@ export default function AdminPatientsPage() {
     <div className={styles.page}>
       <h1 className={styles.title}>Patients</h1>
 
-      <div className={styles.search}>
-        <input
-          className={styles.searchInput}
-          type="text"
-          placeholder="Search by name or email..."
-          value={search}
-          onChange={(e) => handleSearch(e.target.value)}
-        />
-      </div>
+      <input
+        className={styles.searchInput}
+        type="text"
+        placeholder="Search by name or email..."
+        value={search}
+        onChange={(e) => handleSearch(e.target.value)}
+      />
 
       {loading && (
         <div className={styles.grid}>

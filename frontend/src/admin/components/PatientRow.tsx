@@ -20,7 +20,12 @@ export default function PatientRow({ patient, appointments = [], expanded, onTog
     <article className={styles.card}>
       <button className={styles.header} onClick={onToggle} type="button">
         <div className={styles.avatar}>
-          {patient.name.charAt(0).toUpperCase()}
+          {(() => {
+            const parts = patient.name.trim().split(/\s+/).filter(Boolean)
+            if (parts.length === 0) return '?'
+            if (parts.length === 1) return parts[0].charAt(0).toUpperCase()
+            return (parts[0].charAt(0) + parts[parts.length - 1].charAt(0)).toUpperCase()
+          })()}
         </div>
         <div className={styles.info}>
           <span className={styles.name}>{patient.name}</span>

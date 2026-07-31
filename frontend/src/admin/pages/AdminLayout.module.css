@@ -7,11 +7,16 @@
 .content {
   flex: 1;
   padding: var(--space-4) var(--page-padding-x);
-  padding-bottom: calc(var(--space-4) + 64px);
   overflow-y: auto;
 }
 
-@media (min-width: 1024px) {
+@media (max-width: 768px) {
+  .content {
+    padding-bottom: calc(var(--space-4) + 64px);
+  }
+}
+
+@media (min-width: 769px) {
   .layout {
     padding-left: 240px;
   }

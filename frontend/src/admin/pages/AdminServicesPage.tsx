@@ -167,7 +167,7 @@ export default function AdminServicesPage() {
             <label>Requires Follow-up</label>
           </div>
           <div className={styles.modalActions}>
-            <Button variant="ghost" size="small" onClick={() => setModalOpen(false)}>Cancel</Button>
+            <Button variant="ghost" size="small" disabled={submitting} onClick={() => setModalOpen(false)}>Cancel</Button>
             <Button variant="primary" size="small" loading={submitting} onClick={handleSubmit}>{editing ? 'Save' : 'Create'}</Button>
           </div>
         </div>
