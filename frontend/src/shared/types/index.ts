@@ -7,6 +7,14 @@ export interface PatientResponse {
   created_at: string
 }
 
+export interface AdminPatientResponse extends PatientResponse {
+  total_visits: number
+  last_visit_date: string | null
+  pending_count: number
+  completed_count: number
+  prescription_count: number
+}
+
 export interface AuthResponse {
   patient: PatientResponse
   access_token: string
