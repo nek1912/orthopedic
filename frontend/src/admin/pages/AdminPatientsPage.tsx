@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState, useRef, useCallback } from 'react'
 import { apiRequest } from '@shared/api/client'
 import { useToast } from '@shared/context/ToastContext'
 import type { AdminPatientResponse, PatientResponse, AppointmentResponse } from '@shared/types'
@@ -35,12 +35,17 @@ export default function AdminPatientsPage() {
 
   useEffect(() => { fetchPatients() }, [fetchPatients])
 
-  let debounceTimer: ReturnType<typeof setTimeout>
+  const debounceTimer = useRef<ReturnType<typeof setTimeout>>(null)
+
   function handleSearch(val: string) {
     setSearch(val)
-    clearTimeout(debounceTimer)
-    debounceTimer = setTimeout(() => fetchPatients(val || undefined), 300)
+    if (debounceTimer.current) clearTimeout(debounceTimer.current)
+    debounceTimer.current = setTimeout(() => fetchPatients(val || undefined), 300)
   }
+
+  useEffect(() => () => {
+    if (debounceTimer.current) clearTimeout(debounceTimer.current)
+  }, [])
 
   async function toggleExpand(patientId: string) {
     if (expandedId === patientId) {
