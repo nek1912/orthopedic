@@ -2,6 +2,8 @@ import { NavLink, useNavigate } from 'react-router-dom'
 import { useAdminAuth } from '@admin/context/AdminAuthContext'
 import { useState, type JSX } from 'react'
 import MoreDrawer from './MoreDrawer'
+import GlobalSearch from './GlobalSearch'
+import NotificationCenter from './NotificationCenter'
 import styles from './Sidebar.module.css'
 
 const NAV_ITEMS = [
@@ -49,6 +51,9 @@ export default function Sidebar() {
       {/* Desktop Sidebar */}
       <aside className={styles.sidebar}>
         <div className={styles.brand}>Admin Panel</div>
+        <div className={styles.searchWrap}>
+          <GlobalSearch />
+        </div>
         <nav className={styles.nav}>
           {NAV_ITEMS.map((item) => (
             <NavLink
@@ -63,6 +68,9 @@ export default function Sidebar() {
             </NavLink>
           ))}
         </nav>
+        <div className={styles.notifWrap}>
+          <NotificationCenter />
+        </div>
         <div className={styles.footer}>
           <div className={styles.adminInfo}>
             <div className={styles.adminName}>Dr. Rahul Patel</div>
@@ -72,7 +80,7 @@ export default function Sidebar() {
               Clinic Open
             </div>
           </div>
-          <button className={styles.logoutBtn} onClick={handleLogout}>
+          <button className={styles.logoutBtn} type="button" onClick={handleLogout}>
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
               <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/>
             </svg>

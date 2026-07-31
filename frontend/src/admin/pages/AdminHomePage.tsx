@@ -3,6 +3,7 @@ import { apiRequest } from '@shared/api/client'
 import type { AppointmentStats } from '@shared/types'
 import StatCard from '@admin/components/StatCard'
 import AppointmentRow from '@admin/components/AppointmentRow'
+import ActivityLog from '@admin/components/ActivityLog'
 import EmptyState from '@shared/components/EmptyState'
 import { CalendarIcon, ClockIcon, ChartIcon } from '@shared/components/Icons'
 import styles from './AdminHomePage.module.css'
@@ -79,6 +80,13 @@ export default function AdminHomePage() {
         ) : (
           <EmptyState heading="No appointments today" variant="appointments" />
         )}
+      </div>
+
+      <div className={styles.section}>
+        <div className={styles.sectionHeader}>
+          <h2 className={styles.sectionTitle}>Recent Activity</h2>
+        </div>
+        <ActivityLog />
       </div>
     </div>
   )

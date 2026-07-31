@@ -164,3 +164,27 @@ export interface AppointmentStats {
   next_available_day: string | null
   today_appointments: AppointmentResponse[]
 }
+
+export interface ActivityLogResponse {
+  id: string
+  created_at: string
+  action: string
+  entity_type: string
+  entity_id: string
+  detail: string | null
+}
+
+export interface NotificationResponse {
+  id: string
+  created_at: string
+  type: string
+  title: string
+  message: string
+  is_read: boolean
+}
+
+export interface SearchResponse {
+  patients: PatientResponse[]
+  services: ServiceResponse[]
+  appointments: AppointmentResponse[]
+}
