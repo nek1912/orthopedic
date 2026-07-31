@@ -1,0 +1,23 @@
+.layout {
+  display: flex;
+  min-height: 100vh;
+  background-color: var(--color-surface);
+}
+
+.content {
+  flex: 1;
+  padding: var(--space-4) var(--page-padding-x);
+  padding-bottom: calc(var(--space-4) + 64px);
+  overflow-y: auto;
+}
+
+@media (min-width: 1024px) {
+  .layout {
+    padding-left: 240px;
+  }
+
+  .content {
+    padding: var(--space-8) var(--space-8);
+    padding-bottom: var(--space-8);
+  }
+}
