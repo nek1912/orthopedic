@@ -14,8 +14,14 @@ from app.schemas.appointment import (
     RejectRequest,
 )
 from app.services import appointment_service as svc
+from app.services.audit import log_activity
 
 router = APIRouter(prefix="/admin/appointments", tags=["admin-appointments"])
+
+
+def _appointment_summary(appt) -> str:
+    service = appt.service.name if appt.service else appt.service_description
+    return f"{appt.patient.name} · {service} · {appt.requested_date}"
 
 
 def _build_response(appt) -> AppointmentResponse:
@@ -82,6 +88,13 @@ async def accept_appointment(
     appt = await svc.accept_appointment(
         db, appointment_id, body.date, body.start_time, body.end_time
     )
+    await log_activity(
+        db,
+        "appointment.accepted",
+        "appointment",
+        str(appt.id),
+        f"{_appointment_summary(appt)} {appt.time_slot_start}-{appt.time_slot_end}",
+    )
     return _build_response(appt)
 
 
@@ -95,6 +108,13 @@ async def reject_appointment(
     appt = await svc.reject_appointment(
         db, appointment_id, body.reason, body.suggested_date
     )
+    await log_activity(
+        db,
+        "appointment.rejected",
+        "appointment",
+        str(appt.id),
+        f"{_appointment_summary(appt)} · {appt.rejection_reason}",
+    )
     return _build_response(appt)
 
 
@@ -105,6 +125,9 @@ async def mark_arrived(
     admin: AdminSettings = Depends(get_current_admin),
 ):
     appt = await svc.mark_arrived(db, appointment_id)
+    await log_activity(
+        db, "appointment.arrived", "appointment", str(appt.id), _appointment_summary(appt)
+    )
     return _build_response(appt)
 
 
@@ -115,4 +138,7 @@ async def mark_completed(
     admin: AdminSettings = Depends(get_current_admin),
 ):
     appt = await svc.mark_completed(db, appointment_id)
+    await log_activity(
+        db, "appointment.completed", "appointment", str(appt.id), _appointment_summary(appt)
+    )
     return _build_response(appt)

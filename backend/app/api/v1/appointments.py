@@ -11,6 +11,7 @@ from app.schemas.appointment import (
     CancelResponse,
 )
 from app.services import appointment_service as svc
+from app.services.audit import create_notification, log_activity
 
 router = APIRouter(prefix="/appointments", tags=["appointments"])
 
@@ -48,6 +49,20 @@ async def create_appointment(
         service_description=body.service_description,
         requested_date=body.requested_date,
     )
+    service_name = appt.service.name if appt.service else (appt.service_description or "service")
+    await create_notification(
+        db,
+        "request.new",
+        "New appointment request",
+        f"{appt.patient.name} requested {service_name} on {appt.requested_date}",
+    )
+    await log_activity(
+        db,
+        "appointment.booked",
+        "appointment",
+        str(appt.id),
+        f"{appt.patient.name} booked {service_name} for {appt.requested_date}",
+    )
     return _build_response(appt)
 
 
@@ -82,5 +97,18 @@ async def cancel_appointment(
     db: AsyncSession = Depends(get_db),
     patient: Patient = Depends(get_current_patient),
 ):
-    await svc.cancel_appointment(db, appointment_id, str(patient.id))
+    appt = await svc.cancel_appointment(db, appointment_id, str(patient.id))
+    await create_notification(
+        db,
+        "appointment.cancelled",
+        "Appointment cancelled",
+        f"{appt.patient.name} cancelled the {appt.requested_date} appointment",
+    )
+    await log_activity(
+        db,
+        "appointment.cancelled",
+        "appointment",
+        str(appt.id),
+        f"{appt.patient.name} cancelled the {appt.requested_date} appointment",
+    )
     return CancelResponse()

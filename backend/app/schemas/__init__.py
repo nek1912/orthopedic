@@ -1,3 +1,4 @@
+from app.schemas.activity import ActivityLogResponse
 from app.schemas.admin import AdminLoginRequest, AdminLoginResponse, ChangePasswordRequest
 from app.schemas.auth import AuthResponse, LoginRequest, PatientResponse, RefreshRequest, RegisterRequest
 from app.schemas.appointment import (
@@ -11,12 +12,14 @@ from app.schemas.appointment import (
     RejectRequest,
 )
 from app.schemas.availability import CalendarResponse, DateAvailability
+from app.schemas.notification import NotificationResponse
 from app.schemas.prescription import PrescriptionCreate, PrescriptionResponse
 from app.schemas.service import ServiceResponse
 from app.schemas.unavailability import UnavailabilityCreate, UnavailabilityResponse
 
 __all__ = [
     "AcceptRequest",
+    "ActivityLogResponse",
     "AdminAppointmentDetail",
     "AdminLoginRequest",
     "AdminLoginResponse",
@@ -30,6 +33,7 @@ __all__ = [
     "ChangePasswordRequest",
     "DateAvailability",
     "LoginRequest",
+    "NotificationResponse",
     "PatientResponse",
     "PrescriptionCreate",
     "PrescriptionResponse",

@@ -9,6 +9,7 @@ from app.core.security import get_current_admin
 from app.models.admin import AdminSettings
 from app.models.unavailability import DoctorUnavailability, RecurringEnum
 from app.schemas.unavailability import UnavailabilityCreate, UnavailabilityResponse
+from app.services.audit import log_activity
 
 
 router = APIRouter(prefix="/admin/unavailability", tags=["admin-unavailability"])
@@ -56,6 +57,13 @@ async def create_unavailability(
     db.add(u)
     await db.commit()
     await db.refresh(u)
+    await log_activity(
+        db,
+        "unavailability.created",
+        "unavailability",
+        str(u.id),
+        f"{u.date} {u.start_time}-{u.end_time}",
+    )
     return _response(u)
 
 
@@ -74,6 +82,11 @@ async def delete_unavailability(
     if u is None:
         raise HTTPException(status_code=404, detail="Unavailability not found")
 
+    uid = str(u.id)
+    detail = f"{u.date} {u.start_time}-{u.end_time}"
     await db.delete(u)
     await db.commit()
+    await log_activity(
+        db, "unavailability.deleted", "unavailability", uid, detail
+    )
     return {"message": "Unavailability removed"}

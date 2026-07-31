@@ -14,6 +14,7 @@ from app.schemas.service import (
     ServiceUpdate,
     ToggleActiveRequest,
 )
+from app.services.audit import log_activity
 
 
 router = APIRouter(prefix="/admin/services", tags=["admin-services"])
@@ -71,6 +72,9 @@ async def create_service(
     db.add(service)
     await db.commit()
     await db.refresh(service)
+    await log_activity(
+        db, "service.created", "service", str(service.id), service.name
+    )
     return _service_response(service)
 
 
@@ -86,6 +90,9 @@ async def update_service(
         setattr(service, field, value)
     await db.commit()
     await db.refresh(service)
+    await log_activity(
+        db, "service.updated", "service", str(service.id), service.name
+    )
     return _service_response(service)
 
 
@@ -100,4 +107,8 @@ async def toggle_active(
     service.is_active = body.active
     await db.commit()
     await db.refresh(service)
+    action = "service.activated" if service.is_active else "service.deactivated"
+    await log_activity(
+        db, action, "service", str(service.id), service.name
+    )
     return _service_response(service)

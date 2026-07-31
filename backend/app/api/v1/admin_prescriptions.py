@@ -16,6 +16,7 @@ from app.schemas.prescription import (
     PrescriptionTemplateCreate,
     PrescriptionTemplateResponse,
 )
+from app.services.audit import log_activity
 
 
 router = APIRouter(prefix="/admin/prescriptions", tags=["admin-prescriptions"])
@@ -79,6 +80,13 @@ async def create_prescription(
     await db.commit()
     await db.refresh(presc)
     presc.appointment = appointment
+    await log_activity(
+        db,
+        "prescription.created",
+        "prescription",
+        str(presc.id),
+        f"appointment {body.appointment_id}",
+    )
 
     return _prescription_response(presc)
 

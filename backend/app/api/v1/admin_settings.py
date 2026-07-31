@@ -5,6 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.database import get_db
 from app.core.security import get_current_admin
 from app.models.admin import AdminSettings
+from app.services.audit import log_activity
 
 
 class SettingsResponse(BaseModel):
@@ -49,6 +50,7 @@ async def update_settings(
         admin.phone = body.phone
     await db.commit()
     await db.refresh(admin)
+    await log_activity(db, "settings.updated", "settings", "settings", None)
 
     return SettingsResponse(
         clinic_name=admin.clinic_name,
