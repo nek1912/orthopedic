@@ -62,6 +62,11 @@ export interface AppointmentResponse {
   updated_at: string
 }
 
+export interface AdminAppointmentDetail extends AppointmentResponse {
+  patient_email: string
+  patient_phone: string | null
+}
+
 export interface AppointmentListResponse {
   appointments: AppointmentResponse[]
 }
