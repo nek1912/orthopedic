@@ -1,0 +1,104 @@
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.summary {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: var(--space-6) var(--space-4);
+  background: linear-gradient(135deg, rgba(124, 106, 87, 0.06) 0%, rgba(124, 106, 87, 0.02) 100%);
+  border-radius: var(--radius-lg);
+  margin-bottom: var(--space-4);
+}
+
+.iconRow {
+  margin-bottom: var(--space-3);
+}
+
+.iconCircle {
+  width: 56px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background-color: var(--color-accent);
+  color: #FFFFFF;
+}
+
+.icon {
+  width: 28px;
+  height: 28px;
+}
+
+.serviceName {
+  font-family: var(--font-display);
+  font-size: var(--text-lg);
+  font-weight: var(--weight-regular);
+  color: var(--color-primary);
+  margin-bottom: var(--space-1);
+}
+
+.confirmText {
+  font-size: var(--text-xs);
+  color: var(--color-text-secondary);
+}
+
+.details {
+  display: flex;
+  flex-direction: column;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) 0;
+}
+
+.rowIcon {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-sm);
+  background-color: var(--color-surface-muted);
+  color: var(--color-accent);
+  flex-shrink: 0;
+}
+
+.rowIconSvg {
+  width: 18px;
+  height: 18px;
+}
+
+.rowContent {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.rowLabel {
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-wide);
+  font-family: var(--font-heading);
+}
+
+.rowValue {
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  color: var(--color-text);
+}
+
+.divider {
+  height: 1px;
+  background-color: var(--color-border-light);
+  margin: var(--space-1) 0;
+}
