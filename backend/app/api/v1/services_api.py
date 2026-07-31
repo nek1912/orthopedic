@@ -18,6 +18,10 @@ async def list_services(db: AsyncSession = Depends(get_db)):
             id=str(s.id),
             name=s.name,
             description=s.description,
+            duration_minutes=s.duration_minutes,
+            default_fee=s.default_fee,
+            preparation_notes=s.preparation_notes,
+            requires_followup=s.requires_followup,
             is_active=s.is_active,
         )
         for s in services
