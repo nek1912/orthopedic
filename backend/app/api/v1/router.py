@@ -10,6 +10,7 @@ from app.api.v1.services_api import router as services_router
 from app.api.v1.admin_appointments import router as admin_appointments_router
 from app.api.v1.admin_patients import router as admin_patients_router
 from app.api.v1.admin_prescriptions import router as admin_prescriptions_router
+from app.api.v1.admin_search import router as admin_search_router
 from app.api.v1.admin_unavailability import router as admin_unavailability_router
 from app.api.v1.admin_services import router as admin_services_router
 from app.api.v1.admin_settings import router as admin_settings_router
@@ -26,6 +27,7 @@ router.include_router(services_router)
 router.include_router(admin_appointments_router)
 router.include_router(admin_patients_router)
 router.include_router(admin_prescriptions_router)
+router.include_router(admin_search_router)
 router.include_router(admin_unavailability_router)
 router.include_router(admin_services_router)
 router.include_router(admin_settings_router)
