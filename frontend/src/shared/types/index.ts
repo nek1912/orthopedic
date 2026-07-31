@@ -95,8 +95,18 @@ export interface RejectRequest {
 export interface PrescriptionResponse {
   id: string
   appointment_id: string
+  patient_name: string
   medicines: Record<string, unknown> | null
   diagnosis: string | null
+  notes: string | null
+  created_at: string
+}
+
+export interface PrescriptionTemplateResponse {
+  id: string
+  name: string
+  diagnosis: string | null
+  medicines: Record<string, unknown> | null
   notes: string | null
   created_at: string
 }
