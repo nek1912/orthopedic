@@ -10,6 +10,7 @@ import ActivityLog from '@admin/components/ActivityLog'
 import Skeleton from '@shared/components/Skeleton'
 import EmptyState from '@shared/components/EmptyState'
 import { CalendarIcon, ClockIcon, ChartIcon } from '@shared/components/Icons'
+import Button from '@shared/components/Button'
 import styles from './AdminTodayPage.module.css'
 
 function localDateISO(d: Date): string {
@@ -39,6 +40,8 @@ export default function AdminTodayPage() {
   const [statsLoading, setStatsLoading] = useState(true)
   const [statsError, setStatsError] = useState(false)
   const [completeModal, setCompleteModal] = useState<AppointmentResponse | null>(null)
+  const [cancelModal, setCancelModal] = useState<AppointmentResponse | null>(null)
+  const [cancelReason, setCancelReason] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const { toast } = useToast()
 
@@ -64,24 +67,27 @@ export default function AdminTodayPage() {
 
   useEffect(() => { fetchToday(); fetchStats() }, [fetchToday, fetchStats])
 
-  async function handleArrive(appt: AppointmentResponse) {
-    try {
-      await apiRequest(`/api/v1/admin/appointments/${appt.id}/arrive`, { method: 'PATCH' })
-      toast(`${appt.patient_name} has arrived`, 'success')
-      fetchToday()
-    } catch {
-      toast('Failed to mark arrival', 'error')
-    }
+  function handleCancel(appt: AppointmentResponse) {
+    setCancelModal(appt)
   }
 
-  async function handleCancel(appt: AppointmentResponse) {
+  async function handleCancelConfirm() {
+    if (!cancelModal || submitting) return
+    setSubmitting(true)
     try {
-      await apiRequest(`/api/v1/admin/appointments/${appt.id}/cancel`, { method: 'PATCH' })
-      toast(`${appt.patient_name}'s appointment cancelled`, 'success')
+      await apiRequest(`/api/v1/admin/appointments/${cancelModal.id}/cancel`, { 
+        method: 'PATCH',
+        body: { reason: cancelReason || null }
+      })
+      toast(`${cancelModal.patient_name}'s appointment cancelled`, 'success')
+      setCancelModal(null)
+      setCancelReason('')
       fetchToday()
     } catch (err) {
       if (err instanceof ApiError) toast(err.detail, 'error')
       else toast('Failed to cancel appointment', 'error')
+    } finally {
+      setSubmitting(false)
     }
   }
 
@@ -104,7 +110,7 @@ export default function AdminTodayPage() {
   return (
     <div className={styles.page}>
       <div className={styles.greeting}>
-        <h1 className={styles.greetingTitle}>{getGreeting()} Dr. Patel</h1>
+        <h1 className={styles.greetingTitle}>{getGreeting()}, Doctor</h1>
         <p className={styles.greetingDate}>{new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}</p>
       </div>
 
@@ -150,7 +156,6 @@ export default function AdminTodayPage() {
               key={a.id}
               appointment={a}
               showActions={true}
-              onArrive={() => handleArrive(a)}
               onComplete={() => setCompleteModal(a)}
               onCancel={() => handleCancel(a)}
             />
@@ -174,6 +179,20 @@ export default function AdminTodayPage() {
             submitting={submitting}
           />
         )}
+      </Modal>
+      <Modal open={!!cancelModal} onClose={() => { setCancelModal(null); setCancelReason('') }} title="Cancel Appointment">
+        <div className={styles.rejectModal}>
+          <textarea
+            className={styles.rejectTextarea}
+            placeholder="Reason for cancellation (optional)"
+            value={cancelReason}
+            onChange={(e) => setCancelReason(e.target.value)}
+          />
+          <div className={styles.rejectActions}>
+            <Button variant="ghost" size="small" onClick={() => { setCancelModal(null); setCancelReason('') }}>Keep</Button>
+            <Button variant="primary" size="small" loading={submitting} onClick={handleCancelConfirm}>Cancel Appointment</Button>
+          </div>
+        </div>
       </Modal>
     </div>
   )

@@ -24,10 +24,11 @@ export function setTokenGetter(fn: () => string | null) {
   getToken = fn
 }
 
-function getAuthToken(): string | null {
-  const patientToken = getToken()
-  if (patientToken) return patientToken
-  return localStorage.getItem('admin_token')
+function getAuthToken(path?: string): string | null {
+  if (path?.startsWith('/api/v1/admin')) {
+    return null
+  }
+  return getToken()
 }
 
 async function tryRefreshToken(): Promise<boolean> {
@@ -60,7 +61,7 @@ export async function apiRequest<T>(path: string, options: RequestOptions = {}):
   }
 
   if (auth && !reqHeaders['Authorization']) {
-    const token = getAuthToken()
+    const token = getAuthToken(path)
     if (token) {
       reqHeaders['Authorization'] = `Bearer ${token}`
     }
@@ -84,6 +85,10 @@ export async function apiRequest<T>(path: string, options: RequestOptions = {}):
         body: body ? JSON.stringify(body) : undefined,
         credentials: 'include',
       })
+    } else {
+      localStorage.removeItem('access_token')
+      localStorage.removeItem('refresh_token')
+      localStorage.removeItem('patient')
     }
   }
 

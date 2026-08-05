@@ -36,7 +36,7 @@ export default function RegisterPage() {
   return (
     <AuthForm
       title="Create your account"
-      subtitle="Join us for better dental care"
+      subtitle="Join us for expert orthopedic care"
       onSubmit={handleSubmit}
       loading={loading}
       submitLabel="Create account"

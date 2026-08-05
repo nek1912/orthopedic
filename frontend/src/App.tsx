@@ -5,6 +5,7 @@ import { AdminAuthProvider } from '@admin/context/AdminAuthContext'
 import { ToastProvider } from '@shared/context/ToastContext'
 import PatientRoute from '@shared/components/PatientRoute'
 import AdminRoute from '@shared/components/AdminRoute'
+import ErrorBoundary from '@shared/components/ErrorBoundary'
 import LandingPage from '@patient/pages/LandingPage'
 import LoginPage from '@patient/pages/LoginPage'
 import RegisterPage from '@patient/pages/RegisterPage'
@@ -34,9 +35,11 @@ export default function App() {
             <Route
               path="/admin/*"
               element={
-                <Suspense fallback={<div>Loading...</div>}>
-                  <AdminDashboard />
-                </Suspense>
+                <ErrorBoundary>
+                  <Suspense fallback={<div>Loading...</div>}>
+                    <AdminDashboard />
+                  </Suspense>
+                </ErrorBoundary>
               }
             />
           </Route>

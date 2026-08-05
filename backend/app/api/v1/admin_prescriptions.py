@@ -1,6 +1,7 @@
 import uuid
 
 from fastapi import APIRouter, Depends, HTTPException
+from pydantic import BaseModel
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
@@ -17,6 +18,12 @@ from app.schemas.prescription import (
     PrescriptionTemplateResponse,
 )
 from app.services.audit import log_activity
+
+
+class PrescriptionUpdate(BaseModel):
+    diagnosis: str | None = None
+    medicines: dict | None = None
+    notes: str | None = None
 
 
 router = APIRouter(prefix="/admin/prescriptions", tags=["admin-prescriptions"])
@@ -150,3 +157,43 @@ async def get_prescriptions(
         .order_by(Prescription.created_at.desc())
     )
     return [_prescription_response(p) for p in result.scalars().all()]
+
+
+@router.patch("/{prescription_id}", response_model=PrescriptionResponse)
+async def update_prescription(
+    prescription_id: str,
+    body: PrescriptionUpdate,
+    db: AsyncSession = Depends(get_db),
+    admin: AdminSettings = Depends(get_current_admin),
+):
+    try:
+        uid = uuid.UUID(prescription_id)
+    except ValueError:
+        raise HTTPException(status_code=404, detail="Prescription not found")
+
+    result = await db.execute(
+        select(Prescription)
+        .where(Prescription.id == uid)
+        .options(selectinload(Prescription.appointment).selectinload(Appointment.patient))
+    )
+    presc = result.scalar_one_or_none()
+    if presc is None:
+        raise HTTPException(status_code=404, detail="Prescription not found")
+
+    if body.diagnosis is not None:
+        presc.diagnosis = body.diagnosis
+    if body.medicines is not None:
+        presc.medicines = body.medicines
+    if body.notes is not None:
+        presc.notes = body.notes
+
+    await db.commit()
+    await db.refresh(presc)
+    await log_activity(
+        db,
+        "prescription.updated",
+        "prescription",
+        str(presc.id),
+        f"appointment {presc.appointment_id}",
+    )
+    return _prescription_response(presc)

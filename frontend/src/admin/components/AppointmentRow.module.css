@@ -154,3 +154,25 @@
   background-color: var(--color-danger);
   color: #FFFFFF;
 }
+
+.editBtn {
+  width: auto;
+  padding: 0 var(--space-3);
+  background-color: rgba(74, 158, 142, 0.1);
+  color: var(--color-accent);
+  font-size: var(--text-xs);
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-sm);
+  font-weight: var(--weight-semibold);
+  cursor: pointer;
+  transition: all var(--duration-fast) var(--ease-out);
+  font-family: var(--font-heading);
+}
+
+.editBtn:hover {
+  background-color: var(--color-accent);
+  color: #FFFFFF;
+}

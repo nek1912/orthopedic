@@ -1,5 +1,5 @@
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone
 
 from sqlalchemy import DateTime, ForeignKey, JSON, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -15,7 +15,7 @@ class Prescription(Base):
     medicines: Mapped[dict | None] = mapped_column(JSON, nullable=True)
     diagnosis: Mapped[str | None] = mapped_column(Text, nullable=True)
     notes: Mapped[str | None] = mapped_column(Text, nullable=True)
-    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=datetime.now)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
 
     appointment = relationship("Appointment", back_populates="prescriptions")
 
@@ -28,4 +28,4 @@ class PrescriptionTemplate(Base):
     diagnosis: Mapped[str | None] = mapped_column(Text, nullable=True)
     medicines: Mapped[dict | None] = mapped_column(JSON, nullable=True)
     notes: Mapped[str | None] = mapped_column(Text, nullable=True)
-    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=datetime.now)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))

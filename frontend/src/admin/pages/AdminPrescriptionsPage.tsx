@@ -52,22 +52,33 @@ export default function AdminPrescriptionsPage() {
       {activeTab === 'recent' && (
         prescriptions.length ? (
           <div className={styles.list}>
-            {prescriptions.map((rx) => (
-              <div key={rx.id} className={styles.card}>
-                <div className={styles.cardHeader}>
-                  <div className={styles.patientName}>{rx.patient_name}</div>
-                  <div className={styles.date}>{new Date(rx.created_at).toLocaleDateString()}</div>
-                </div>
-                {rx.diagnosis && <div className={styles.diagnosis}>{rx.diagnosis}</div>}
-                {Object.keys(rx.medicines ?? {}).length > 0 && (
-                  <div className={styles.medicines}>
-                    {Object.keys(rx.medicines ?? {}).map((name) => (
-                      <span key={name} className={styles.medicine}>{name}</span>
-                    ))}
+            {prescriptions.map((rx) => {
+              const medList = Array.isArray(rx.medicines?.medicines)
+                ? rx.medicines.medicines
+                : Array.isArray(rx.medicines)
+                ? rx.medicines
+                : []
+
+              return (
+                <div key={rx.id} className={styles.card}>
+                  <div className={styles.cardHeader}>
+                    <div className={styles.patientName}>{rx.patient_name}</div>
+                    <div className={styles.date}>{new Date(rx.created_at).toLocaleDateString()}</div>
                   </div>
-                )}
-              </div>
-            ))}
+                  {rx.diagnosis && <div className={styles.diagnosis}><strong>Diagnosis:</strong> {rx.diagnosis}</div>}
+                  {medList.length > 0 && (
+                    <div className={styles.medicines}>
+                      {medList.map((m: any, idx: number) => (
+                        <span key={idx} className={styles.medicine}>
+                          {m.name} {m.dosage ? `(${m.dosage})` : ''} {m.frequency ? `- ${m.frequency}` : ''}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                  {rx.notes && <div className={styles.notes} style={{ fontSize: '0.85rem', color: 'var(--color-text-secondary)', marginTop: '0.5rem' }}><em>Notes: {rx.notes}</em></div>}
+                </div>
+              )
+            })}
           </div>
         ) : (
           <EmptyState heading="No recent prescriptions" subtext="Complete an appointment to write one." variant="default" />

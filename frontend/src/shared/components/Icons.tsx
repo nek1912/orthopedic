@@ -2,65 +2,73 @@ import type { SVGProps } from 'react'
 
 type IconProps = SVGProps<SVGSVGElement>
 
-export function ToothIcon({ className = '', ...props }: IconProps) {
+export function JointIcon({ className = '', ...props }: IconProps) {
   return (
     <svg viewBox="0 0 24 24" fill="none" className={className} {...props}>
-      <path d="M12 2C9.5 2 7.5 3 6.5 4.5C5.5 6 5 8 5 10C5 12 5.5 14 6 16C6.5 18 7 20 8 21C8.5 21.5 9 22 10 22C11 22 11.5 21 12 20C12.5 21 13 22 14 22C15 22 15.5 21.5 16 21C17 20 17.5 18 18 16C18.5 14 19 12 19 10C19 8 18.5 6 17.5 4.5C16.5 3 14.5 2 12 2Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-      <path d="M9 10C9 10 10 11 12 11C14 11 15 10 15 10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+      <circle cx="12" cy="7" r="3" stroke="currentColor" strokeWidth="1.5" />
+      <circle cx="12" cy="17" r="3" stroke="currentColor" strokeWidth="1.5" />
+      <path d="M12 10V14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+      <path d="M8 12H16" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
     </svg>
   )
 }
+
+
+
+export function SpineIcon({ className = '', ...props }: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" className={className} {...props}>
+      <rect x="9" y="3" width="6" height="3" rx="1" stroke="currentColor" strokeWidth="1.5" />
+      <rect x="9" y="8" width="6" height="3" rx="1" stroke="currentColor" strokeWidth="1.5" />
+      <rect x="9" y="13" width="6" height="3" rx="1" stroke="currentColor" strokeWidth="1.5" />
+      <rect x="9" y="18" width="6" height="3" rx="1" stroke="currentColor" strokeWidth="1.5" />
+      <line x1="12" y1="6" x2="12" y2="8" stroke="currentColor" strokeWidth="1.5" />
+      <line x1="12" y1="11" x2="12" y2="13" stroke="currentColor" strokeWidth="1.5" />
+      <line x1="12" y1="16" x2="12" y2="18" stroke="currentColor" strokeWidth="1.5" />
+    </svg>
+  )
+}
+
+
+
+export function FractureIcon({ className = '', ...props }: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" className={className} {...props}>
+      <path d="M6 4C5 4 4 5 4 6.5C4 8 5.5 9 7 10L17 14C18.5 15 20 16 20 17.5C20 19 19 20 18 20" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+      <path d="M12 9L10 12L13 15" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  )
+}
+
+
+
+export function SportsMedicineIcon({ className = '', ...props }: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" className={className} {...props}>
+      <path d="M13 2L3 14H12L11 22L21 10H12L13 2Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  )
+}
+
+
+
+export function ArthritisIcon({ className = '', ...props }: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" className={className} {...props}>
+      <circle cx="12" cy="12" r="7" stroke="currentColor" strokeWidth="1.5" />
+      <path d="M12 8V12L15 13" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+      <circle cx="12" cy="12" r="2" fill="currentColor" opacity="0.3" />
+    </svg>
+  )
+}
+
+
 
 export function CheckupIcon({ className = '', ...props }: IconProps) {
   return (
     <svg viewBox="0 0 24 24" fill="none" className={className} {...props}>
-      <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="1.5"/>
-      <path d="M12 8V16" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-      <path d="M8 12H16" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-      <circle cx="12" cy="12" r="3" stroke="currentColor" strokeWidth="1" opacity="0.4"/>
-    </svg>
-  )
-}
-
-export function CleaningIcon({ className = '', ...props }: IconProps) {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" className={className} {...props}>
-      <path d="M4 20L8 16" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-      <path d="M14.5 6.5L17.5 9.5C18.6 10.6 18.6 12.4 17.5 13.5L13 18" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-      <path d="M10 10L14 6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-      <circle cx="7" cy="17" r="2" stroke="currentColor" strokeWidth="1.5"/>
-      <path d="M18 3L21 6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-      <path d="M15 6L18 3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-    </svg>
-  )
-}
-
-export function FillingIcon({ className = '', ...props }: IconProps) {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" className={className} {...props}>
-      <path d="M12 2C9.5 2 7.5 3 6.5 4.5C5.5 6 5 8 5 10C5 12 5.5 14 6 16C6.5 18 7 20 8 21C8.5 21.5 9 22 10 22C11 22 11.5 21 12 20C12.5 21 13 22 14 22C15 22 15.5 21.5 16 21C17 20 17.5 18 18 16C18.5 14 19 12 19 10C19 8 18.5 6 17.5 4.5C16.5 3 14.5 2 12 2Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-      <path d="M10 9L12 11L14 9" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-      <path d="M12 11V15" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-    </svg>
-  )
-}
-
-export function RootCanalIcon({ className = '', ...props }: IconProps) {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" className={className} {...props}>
-      <path d="M12 2C9.5 2 7.5 3 6.5 4.5C5.5 6 5 8 5 10C5 12 5.5 14 6 16C6.5 18 7 20 8 21C8.5 21.5 9 22 10 22C11 22 11.5 21 12 20C12.5 21 13 22 14 22C15 22 15.5 21.5 16 21C17 20 17.5 18 18 16C18.5 14 19 12 19 10C19 8 18.5 6 17.5 4.5C16.5 3 14.5 2 12 2Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-      <path d="M12 6V14" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-      <path d="M9 8L12 6L15 8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-    </svg>
-  )
-}
-
-export function WhiteningIcon({ className = '', ...props }: IconProps) {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" className={className} {...props}>
-      <path d="M12 2C9.5 2 7.5 3 6.5 4.5C5.5 6 5 8 5 10C5 12 5.5 14 6 16C6.5 18 7 20 8 21C8.5 21.5 9 22 10 22C11 22 11.5 21 12 20C12.5 21 13 22 14 22C15 22 15.5 21.5 16 21C17 20 17.5 18 18 16C18.5 14 19 12 19 10C19 8 18.5 6 17.5 4.5C16.5 3 14.5 2 12 2Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-      <path d="M8 10L10 8L12 10L14 8L16 10" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" opacity="0.5"/>
-      <circle cx="12" cy="5" r="1" fill="currentColor" opacity="0.3"/>
+      <path d="M12 21A9 9 0 1 0 12 3a9 9 0 0 0 0 18z" stroke="currentColor" strokeWidth="1.5" />
+      <path d="M9 12l2 2 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   )
 }

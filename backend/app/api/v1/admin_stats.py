@@ -42,7 +42,7 @@ async def get_stats(
     admin: AdminSettings = Depends(get_current_admin),
 ):
     today = date.today()
-    today_appts = await svc.get_admin_appointments(db, date_=today)
+    today_appts = await svc.get_admin_appointments(db, status="accepted", date_=today)
     pending_appts = await svc.get_admin_appointments(db, status="pending")
 
     total_patients_result = await db.execute(select(func.count(Patient.id)))

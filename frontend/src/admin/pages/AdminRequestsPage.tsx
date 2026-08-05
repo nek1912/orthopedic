@@ -36,16 +36,41 @@ export default function AdminRequestsPage() {
 
   const selectedIdRef = useRef<string | null>(null)
 
+  const [bookedSlots, setBookedSlots] = useState<{ start: string; end: string; label: string }[]>([])
+  const [unavailableSlots, setUnavailableSlots] = useState<{ start: string; end: string }[]>([])
+
   const selectRequest = useCallback(async (appt: AppointmentResponse) => {
     setSelected(appt)
     setDetail(null)
     setDetailLoading(true)
+    setBookedSlots([])
+    setUnavailableSlots([])
     selectedIdRef.current = appt.id
     const id = appt.id
     try {
       const data = await apiRequest<AdminAppointmentDetail>(`/api/v1/admin/appointments/${id}`)
       if (selectedIdRef.current !== id) return
       setDetail(data)
+
+      try {
+        const [acceptedData, unavailData] = await Promise.all([
+          apiRequest<{ appointments: AppointmentResponse[] }>(`/api/v1/admin/appointments?status=accepted&date=${data.requested_date}`),
+          apiRequest<{ id: string; date: string; start_time: string; end_time: string }[]>('/api/v1/admin/unavailability').catch(() => []),
+        ])
+        if (selectedIdRef.current !== id) return
+        setBookedSlots(
+          (acceptedData?.appointments || [])
+            .filter((a) => a.time_slot_start && a.time_slot_end)
+            .map((a) => ({ start: a.time_slot_start!, end: a.time_slot_end!, label: a.patient_name }))
+        )
+        setUnavailableSlots(
+          (unavailData || [])
+            .filter((u) => u.start_time && u.end_time && u.date === data.requested_date)
+            .map((u) => ({ start: u.start_time, end: u.end_time }))
+        )
+      } catch {
+        // ignore supplementary availability fetch error
+      }
     } catch (err) {
       if (selectedIdRef.current !== id) return
       if (err instanceof ApiError) {
@@ -59,7 +84,7 @@ export default function AdminRequestsPage() {
   }, [toast])
 
   async function handleAccept(start: string, end: string) {
-    if (!selected) return
+    if (!selected || submitting) return
     setSubmitting(true)
     try {
       await apiRequest(`/api/v1/admin/appointments/${selected.id}/accept`, {
@@ -82,7 +107,7 @@ export default function AdminRequestsPage() {
   }
 
   async function handleReject() {
-    if (!rejectModal) return
+    if (!rejectModal || submitting) return
     setSubmitting(true)
     try {
       await apiRequest(`/api/v1/admin/appointments/${rejectModal.id}/reject`, {
@@ -170,8 +195,8 @@ export default function AdminRequestsPage() {
                   <div className={styles.detailLabel}>Assign Time Slot</div>
                   <TimeSlotPicker
                     date={detail.requested_date}
-                    bookedSlots={[]}
-                    unavailableSlots={[]}
+                    bookedSlots={bookedSlots}
+                    unavailableSlots={unavailableSlots}
                     onSelect={handleAccept}
                   />
                 </div>

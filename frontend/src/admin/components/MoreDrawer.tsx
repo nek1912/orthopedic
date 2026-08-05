@@ -8,9 +8,7 @@ interface MoreDrawerProps {
 }
 
 const MORE_ITEMS = [
-  { path: '/admin/schedule', label: 'Schedule' },
-  { path: '/admin/services', label: 'Services' },
-  { path: '/admin/prescriptions', label: 'Prescriptions' },
+  { path: '/admin/settings', label: 'Clinic Settings' },
 ]
 
 export default function MoreDrawer({ isOpen, onClose, onLogout }: MoreDrawerProps) {

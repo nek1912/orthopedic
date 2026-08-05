@@ -198,6 +198,66 @@
   white-space: nowrap;
 }
 
+.timelineContent {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.timelineNotes {
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+  margin-top: 0.1rem;
+}
+
+.timelineReason {
+  font-size: 0.75rem;
+  color: var(--color-danger);
+  margin-top: 0.1rem;
+}
+
+.prescriptionBlock {
+  margin-top: 0.5rem;
+  padding: 0.5rem;
+  background: var(--color-surface-elevated);
+  border-radius: var(--radius-sm);
+}
+
+.prescriptionTitle {
+  font-size: 0.75rem;
+  display: block;
+  margin-bottom: 0.25rem;
+}
+
+.prescriptionItem {
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+}
+
+.timelineActions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: var(--space-1);
+  flex-shrink: 0;
+}
+
+.editBtn {
+  font-size: var(--text-xs);
+  color: var(--color-accent);
+  cursor: pointer;
+  background: none;
+  border: none;
+  font-weight: var(--weight-semibold);
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-sm);
+}
+
+.editBtn:hover {
+  background-color: rgba(74, 158, 142, 0.08);
+}
+
 @media (min-width: 640px) {
   .detailGrid {
     grid-template-columns: 1fr 1fr;

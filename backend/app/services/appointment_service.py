@@ -10,6 +10,15 @@ from app.models.appointment import Appointment, StatusEnum
 from app.models.service import Service
 from app.services.scheduler import validate_and_accept
 
+VALID_STATUSES = {e.value for e in StatusEnum}
+
+
+def _parse_uuid(value: str) -> uuid.UUID:
+    try:
+        return uuid.UUID(value)
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid ID format")
+
 
 async def create_appointment(
     db: AsyncSession,
@@ -18,24 +27,37 @@ async def create_appointment(
     service_description: str | None,
     requested_date: date,
 ) -> Appointment:
+    pid = _parse_uuid(patient_id)
     if service_id:
+        sid = _parse_uuid(service_id)
         result = await db.execute(
-            select(Service).where(Service.id == uuid.UUID(service_id), Service.is_active == True)
+            select(Service).where(Service.id == sid, Service.is_active == True)
         )
         if result.scalar_one_or_none() is None:
             raise HTTPException(status_code=404, detail="Service not found")
+    else:
+        sid = None
 
     appointment = Appointment(
-        patient_id=uuid.UUID(patient_id),
-        service_id=uuid.UUID(service_id) if service_id else None,
+        patient_id=pid,
+        service_id=sid,
         service_description=service_description,
         requested_date=requested_date,
         status=StatusEnum.pending,
     )
     db.add(appointment)
     await db.commit()
-    await db.refresh(appointment, ["patient", "service"])
-    return appointment
+    
+    result = await db.execute(
+        select(Appointment)
+        .where(Appointment.id == appointment.id)
+        .options(
+            selectinload(Appointment.patient),
+            selectinload(Appointment.service),
+            selectinload(Appointment.prescriptions),
+        )
+    )
+    return result.scalar_one()
 
 
 async def cancel_patient_appointment(
@@ -43,10 +65,15 @@ async def cancel_patient_appointment(
     appointment_id: str,
     patient_id: str,
 ) -> Appointment:
+    appt_uuid = _parse_uuid(appointment_id)
     result = await db.execute(
         select(Appointment)
-        .where(Appointment.id == uuid.UUID(appointment_id))
-        .options(selectinload(Appointment.patient), selectinload(Appointment.service))
+        .where(Appointment.id == appt_uuid)
+        .options(
+            selectinload(Appointment.patient),
+            selectinload(Appointment.service),
+            selectinload(Appointment.prescriptions),
+        )
     )
     appointment = result.scalar_one_or_none()
     if appointment is None:
@@ -58,7 +85,6 @@ async def cancel_patient_appointment(
 
     appointment.status = StatusEnum.cancelled
     await db.commit()
-    await db.refresh(appointment, ["patient", "service"])
     return appointment
 
 
@@ -66,11 +92,16 @@ async def get_patient_appointments(
     db: AsyncSession,
     patient_id: str,
 ) -> list[Appointment]:
+    pid = _parse_uuid(patient_id)
     result = await db.execute(
         select(Appointment)
-        .where(Appointment.patient_id == uuid.UUID(patient_id))
+        .where(Appointment.patient_id == pid)
         .order_by(Appointment.requested_date.desc())
-        .options(selectinload(Appointment.patient), selectinload(Appointment.service))
+        .options(
+            selectinload(Appointment.patient),
+            selectinload(Appointment.service),
+            selectinload(Appointment.prescriptions),
+        )
     )
     return list(result.scalars().all())
 
@@ -79,10 +110,15 @@ async def get_appointment(
     db: AsyncSession,
     appointment_id: str,
 ) -> Appointment | None:
+    appt_uuid = _parse_uuid(appointment_id)
     result = await db.execute(
         select(Appointment)
-        .where(Appointment.id == uuid.UUID(appointment_id))
-        .options(selectinload(Appointment.patient), selectinload(Appointment.service))
+        .where(Appointment.id == appt_uuid)
+        .options(
+            selectinload(Appointment.patient),
+            selectinload(Appointment.service),
+            selectinload(Appointment.prescriptions),
+        )
     )
     return result.scalar_one_or_none()
 
@@ -103,10 +139,15 @@ async def reject_appointment(
     reason: str | None,
     suggested_date: date | None,
 ) -> Appointment:
+    appt_uuid = _parse_uuid(appointment_id)
     result = await db.execute(
         select(Appointment)
-        .where(Appointment.id == uuid.UUID(appointment_id))
-        .options(selectinload(Appointment.patient), selectinload(Appointment.service))
+        .where(Appointment.id == appt_uuid)
+        .options(
+            selectinload(Appointment.patient),
+            selectinload(Appointment.service),
+            selectinload(Appointment.prescriptions),
+        )
     )
     appointment = result.scalar_one_or_none()
     if appointment is None:
@@ -118,7 +159,6 @@ async def reject_appointment(
     appointment.rejection_reason = reason
     appointment.suggested_date = suggested_date
     await db.commit()
-    await db.refresh(appointment, ["patient", "service"])
     return appointment
 
 
@@ -126,10 +166,15 @@ async def mark_arrived(
     db: AsyncSession,
     appointment_id: str,
 ) -> Appointment:
+    appt_uuid = _parse_uuid(appointment_id)
     result = await db.execute(
         select(Appointment)
-        .where(Appointment.id == uuid.UUID(appointment_id))
-        .options(selectinload(Appointment.patient), selectinload(Appointment.service))
+        .where(Appointment.id == appt_uuid)
+        .options(
+            selectinload(Appointment.patient),
+            selectinload(Appointment.service),
+            selectinload(Appointment.prescriptions),
+        )
     )
     appointment = result.scalar_one_or_none()
     if appointment is None:
@@ -138,7 +183,6 @@ async def mark_arrived(
         raise HTTPException(status_code=400, detail="Appointment must be accepted first")
     appointment.arrived_at = datetime.now(timezone.utc)
     await db.commit()
-    await db.refresh(appointment, ["patient", "service"])
     return appointment
 
 
@@ -146,10 +190,15 @@ async def mark_completed(
     db: AsyncSession,
     appointment_id: str,
 ) -> Appointment:
+    appt_uuid = _parse_uuid(appointment_id)
     result = await db.execute(
         select(Appointment)
-        .where(Appointment.id == uuid.UUID(appointment_id))
-        .options(selectinload(Appointment.patient), selectinload(Appointment.service))
+        .where(Appointment.id == appt_uuid)
+        .options(
+            selectinload(Appointment.patient),
+            selectinload(Appointment.service),
+            selectinload(Appointment.prescriptions),
+        )
     )
     appointment = result.scalar_one_or_none()
     if appointment is None:
@@ -159,18 +208,23 @@ async def mark_completed(
 
     appointment.status = StatusEnum.completed
     await db.commit()
-    await db.refresh(appointment, ["patient", "service"])
     return appointment
 
 
 async def cancel_appointment(
     db: AsyncSession,
     appointment_id: str,
+    reason: str | None = None,
 ) -> Appointment:
+    appt_uuid = _parse_uuid(appointment_id)
     result = await db.execute(
         select(Appointment)
-        .where(Appointment.id == uuid.UUID(appointment_id))
-        .options(selectinload(Appointment.patient), selectinload(Appointment.service))
+        .where(Appointment.id == appt_uuid)
+        .options(
+            selectinload(Appointment.patient),
+            selectinload(Appointment.service),
+            selectinload(Appointment.prescriptions),
+        )
     )
     appointment = result.scalar_one_or_none()
     if appointment is None:
@@ -179,8 +233,9 @@ async def cancel_appointment(
         raise HTTPException(status_code=400, detail="Only accepted appointments can be cancelled")
 
     appointment.status = StatusEnum.cancelled
+    if reason:
+        appointment.rejection_reason = reason
     await db.commit()
-    await db.refresh(appointment, ["patient", "service"])
     return appointment
 
 
@@ -190,9 +245,13 @@ async def get_admin_appointments(
     date_: date | None = None,
 ) -> list[Appointment]:
     query = select(Appointment).options(
-        selectinload(Appointment.patient), selectinload(Appointment.service)
+        selectinload(Appointment.patient),
+        selectinload(Appointment.service),
+        selectinload(Appointment.prescriptions),
     )
     if status:
+        if status not in VALID_STATUSES:
+            raise HTTPException(status_code=400, detail=f"Invalid status: {status}")
         query = query.where(Appointment.status == status)
     if date_:
         query = query.where(Appointment.requested_date == date_)
@@ -206,9 +265,10 @@ async def get_appointment_detail(
     db: AsyncSession,
     appointment_id: str,
 ) -> Appointment | None:
+    appt_uuid = _parse_uuid(appointment_id)
     result = await db.execute(
         select(Appointment)
-        .where(Appointment.id == uuid.UUID(appointment_id))
+        .where(Appointment.id == appt_uuid)
         .options(
             selectinload(Appointment.patient),
             selectinload(Appointment.service),
@@ -216,3 +276,26 @@ async def get_appointment_detail(
         )
     )
     return result.scalar_one_or_none()
+
+
+async def update_appointment_notes(
+    db: AsyncSession,
+    appointment_id: str,
+    notes: str | None,
+) -> Appointment:
+    appt_uuid = _parse_uuid(appointment_id)
+    result = await db.execute(
+        select(Appointment)
+        .where(Appointment.id == appt_uuid)
+        .options(
+            selectinload(Appointment.patient),
+            selectinload(Appointment.service),
+            selectinload(Appointment.prescriptions),
+        )
+    )
+    appointment = result.scalar_one_or_none()
+    if appointment is None:
+        raise HTTPException(status_code=404, detail="Appointment not found")
+    appointment.notes = notes
+    await db.commit()
+    return appointment

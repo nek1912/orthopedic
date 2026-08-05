@@ -6,6 +6,7 @@ import { StatusBadge } from '@shared/components/Badge'
 import Button from '@shared/components/Button'
 import Card from '@shared/components/Card'
 import Modal from '@shared/components/Modal'
+import PrescriptionView from './PrescriptionView'
 import styles from './AppointmentCard.module.css'
 
 interface AppointmentCardProps {
@@ -30,6 +31,9 @@ function formatTime(t: string | null): string {
 export default function AppointmentCard({ appointment, onUpdate }: AppointmentCardProps) {
   const [showCancel, setShowCancel] = useState(false)
   const [cancelling, setCancelling] = useState(false)
+  const [showPrescription, setShowPrescription] = useState(false)
+  const [prescriptions, setPrescriptions] = useState<any[]>([])
+  const [loadingPrescription, setLoadingPrescription] = useState(false)
   const { toast } = useToast()
 
   async function handleCancel() {
@@ -49,6 +53,21 @@ export default function AppointmentCard({ appointment, onUpdate }: AppointmentCa
       setCancelling(false)
     }
   }
+
+  async function handleViewPrescription() {
+    setShowPrescription(true)
+    setLoadingPrescription(true)
+    try {
+      const res = await apiRequest<any[]>(`/api/v1/appointments/${appointment.id}/prescriptions`)
+      setPrescriptions(res)
+    } catch {
+      toast('Failed to load prescription', 'error')
+    } finally {
+      setLoadingPrescription(false)
+    }
+  }
+
+  const hasPrescription = appointment.status === 'completed' || appointment.status === 'accepted'
 
   return (
     <>
@@ -72,15 +91,23 @@ export default function AppointmentCard({ appointment, onUpdate }: AppointmentCa
           {appointment.suggested_date && (
             <p className={styles.detail}>Suggested: {formatDate(appointment.suggested_date)}</p>
           )}
-          <p className={styles.meta}>Requested: {formatDate(appointment.created_at?.split('T')[0])}</p>
+          {appointment.notes && (
+            <p className={styles.detail}>Notes: {appointment.notes}</p>
+          )}
+          <p className={styles.meta}>Requested: {formatDate(appointment.requested_date)}</p>
         </div>
-        {appointment.status === 'pending' && (
-          <div className={styles.actions}>
+        <div className={styles.actions}>
+          {appointment.status === 'pending' && (
             <Button variant="ghost" size="small" onClick={() => setShowCancel(true)}>
               Cancel
             </Button>
-          </div>
-        )}
+          )}
+          {hasPrescription && (
+            <Button variant="secondary" size="small" onClick={handleViewPrescription}>
+              View Prescription
+            </Button>
+          )}
+        </div>
       </Card>
 
       <Modal open={showCancel} onClose={() => setShowCancel(false)} title="Cancel Appointment">
@@ -92,6 +119,21 @@ export default function AppointmentCard({ appointment, onUpdate }: AppointmentCa
             </Button>
             <Button variant="primary" size="small" loading={cancelling} onClick={handleCancel}>
               Yes, Cancel
+            </Button>
+          </div>
+        </div>
+      </Modal>
+
+      <Modal open={showPrescription} onClose={() => setShowPrescription(false)} title="Prescription" maxWidth="wide">
+        <div className={styles.modalBody}>
+          {loadingPrescription ? (
+            <p>Loading prescription details...</p>
+          ) : (
+            <PrescriptionView prescriptions={prescriptions} />
+          )}
+          <div className={styles.modalActions}>
+            <Button variant="primary" size="small" onClick={() => setShowPrescription(false)}>
+              Close
             </Button>
           </div>
         </div>

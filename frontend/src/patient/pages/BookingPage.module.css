@@ -177,11 +177,120 @@
 }
 
 .calendarWrap {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-6);
+}
+
+.bookingForm {
   display: flex;
   flex-direction: column;
-  align-items: center;
+  gap: var(--space-8);
+}
+
+.formSection {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.sectionHeading {
+  font-family: var(--font-display);
+  font-size: var(--text-xl);
+  font-weight: var(--weight-medium);
+  color: var(--color-primary);
+  margin-bottom: var(--space-1);
+}
+
+.sectionSub {
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+  margin-bottom: var(--space-4);
+}
+
+.availabilityPanel {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4);
+  display: flex;
+  flex-direction: column;
   gap: var(--space-4);
-  overflow: hidden;
+}
+
+.panelHeading {
+  font-family: var(--font-heading);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  color: var(--color-text);
+  margin: 0;
+}
+
+.selectedDateText {
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  color: var(--color-primary);
+  margin: 0;
+}
+
+.unavailableNote {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  padding: var(--space-3);
+  background: #fef3cd;
+  border: 1px solid #ffc107;
+  border-radius: var(--radius-md);
+  font-size: var(--text-xs);
+  color: #856404;
+}
+
+.unavailableIcon {
+  font-size: var(--text-sm);
+  flex-shrink: 0;
+}
+
+.unavailableNote strong {
+  display: block;
+  margin-bottom: 2px;
+}
+
+.unavailableTime {
+  margin: 2px 0 0 0;
+  font-size: var(--text-xs);
+}
+
+.unavailableReason {
+  color: #856404;
+  font-style: italic;
+}
+
+.infoBox {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  background-color: var(--color-surface-hover);
+  border-radius: var(--radius-md);
+  margin-top: auto;
+}
+
+.infoIcon {
+  font-size: var(--text-lg);
+}
+
+.infoBox strong {
+  display: block;
+  font-size: var(--text-xs);
+  color: var(--color-text);
+  margin-bottom: 2px;
+}
+
+.infoBox p {
+  font-size: var(--text-xs);
+  color: var(--color-text-secondary);
+  margin: 0;
+  line-height: var(--leading-snug);
 }
 
 .actions {
@@ -222,5 +331,10 @@
 
   .content {
     padding: var(--space-8);
+  }
+
+  .calendarWrap {
+    grid-template-columns: 1fr 1fr;
+    align-items: flex-start;
   }
 }

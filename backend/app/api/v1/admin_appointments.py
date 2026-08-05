@@ -13,6 +13,8 @@ from app.schemas.appointment import (
     AppointmentResponse,
     RejectRequest,
 )
+from pydantic import BaseModel
+
 from app.services import appointment_service as svc
 from app.services.audit import log_activity
 
@@ -27,20 +29,20 @@ def _appointment_summary(appt) -> str:
 def _build_response(appt) -> AppointmentResponse:
     return AppointmentResponse(
         id=str(appt.id),
-        patient_id=str(appt.patient_id),
-        patient_name=appt.patient.name if appt.patient else "",
+        patient_id=str(appt.patient_id) if appt.patient_id else "",
+        patient_name=appt.patient.name if (hasattr(appt, 'patient') and appt.patient) else "",
         service_id=str(appt.service_id) if appt.service_id else None,
-        service_name=appt.service.name if appt.service else None,
+        service_name=appt.service.name if (hasattr(appt, 'service') and appt.service) else None,
         service_description=appt.service_description,
-        requested_date=appt.requested_date,
-        status=appt.status.value if hasattr(appt.status, 'value') else appt.status,
+        requested_date=str(appt.requested_date) if appt.requested_date else "",
+        status=appt.status.value if hasattr(appt.status, 'value') else str(appt.status),
         rejection_reason=appt.rejection_reason,
-        suggested_date=appt.suggested_date,
-        time_slot_start=appt.time_slot_start,
-        time_slot_end=appt.time_slot_end,
+        suggested_date=str(appt.suggested_date) if appt.suggested_date else None,
+        time_slot_start=str(appt.time_slot_start) if appt.time_slot_start else None,
+        time_slot_end=str(appt.time_slot_end) if appt.time_slot_end else None,
         notes=appt.notes,
-        created_at=appt.created_at,
-        updated_at=appt.updated_at,
+        created_at=str(appt.created_at) if appt.created_at else None,
+        updated_at=str(appt.updated_at) if appt.updated_at else None,
     )
 
 
@@ -144,13 +146,32 @@ async def mark_completed(
     return _build_response(appt)
 
 
-@router.patch("/{appointment_id}/cancel", response_model=AppointmentResponse)
-async def cancel_appointment(
+class AdminCancelRequest(BaseModel):
+    reason: str | None = None
+
+class UpdateNotesRequest(BaseModel):
+    notes: str | None = None
+
+@router.patch("/{appointment_id}/notes", response_model=AppointmentResponse)
+async def update_notes(
     appointment_id: str,
+    body: UpdateNotesRequest,
     db: AsyncSession = Depends(get_db),
     admin: AdminSettings = Depends(get_current_admin),
 ):
-    appt = await svc.cancel_appointment(db, appointment_id)
+    appt = await svc.update_appointment_notes(db, appointment_id, body.notes)
+    return _build_response(appt)
+
+
+@router.patch("/{appointment_id}/cancel", response_model=AppointmentResponse)
+async def cancel_appointment(
+    appointment_id: str,
+    body: AdminCancelRequest | None = None,
+    db: AsyncSession = Depends(get_db),
+    admin: AdminSettings = Depends(get_current_admin),
+):
+    reason = body.reason if body else None
+    appt = await svc.cancel_appointment(db, appointment_id, reason)
     await log_activity(
         db, "appointment.cancelled", "appointment", str(appt.id), _appointment_summary(appt)
     )

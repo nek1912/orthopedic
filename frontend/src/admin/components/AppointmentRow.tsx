@@ -10,6 +10,8 @@ interface AppointmentRowProps {
   onArrive?: () => void
   onComplete?: () => void
   onCancel?: () => void
+  onPrescription?: () => void
+  onEdit?: () => void
   showActions?: boolean
 }
 
@@ -32,7 +34,7 @@ function getInitial(name: string): string {
   return name?.charAt(0)?.toUpperCase() || '?'
 }
 
-export default function AppointmentRow({ appointment, onAccept, onReject, onArrive, onComplete, onCancel, showActions = true }: AppointmentRowProps) {
+export default function AppointmentRow({ appointment, onAccept, onReject, onComplete, onCancel, onPrescription: _onPrescription, onEdit, showActions = true }: AppointmentRowProps) {
   return (
     <div className={styles.row}>
       <div className={styles.avatar}>
@@ -74,14 +76,21 @@ export default function AppointmentRow({ appointment, onAccept, onReject, onArri
       )}
       {showActions && appointment.status === 'accepted' && (
         <div className={styles.actions}>
-          {onArrive && (
-            <button type="button" className={styles.arrive} onClick={onArrive}>Arrived</button>
-          )}
           {onComplete && (
             <button type="button" className={styles.complete} onClick={onComplete}>Complete</button>
           )}
+          {onEdit && (
+            <button type="button" className={styles.editBtn} onClick={onEdit}>Edit</button>
+          )}
           {onCancel && (
             <button type="button" className={styles.cancel} onClick={onCancel}>Cancel</button>
+          )}
+        </div>
+      )}
+      {showActions && appointment.status === 'completed' && (
+        <div className={styles.actions}>
+          {onEdit && (
+            <button type="button" className={styles.editBtn} onClick={onEdit}>Edit</button>
           )}
         </div>
       )}

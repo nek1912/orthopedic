@@ -50,6 +50,7 @@ export interface DateAvailability {
   count: number
   level: string
   blocked: boolean
+  unavailable_hours?: UnavailabilitySlot[]
 }
 
 export interface CalendarResponse {
@@ -72,6 +73,7 @@ export interface AppointmentResponse {
   notes: string | null
   created_at: string
   updated_at: string
+  prescriptions?: PrescriptionResponse[]
 }
 
 export interface AdminAppointmentDetail extends AppointmentResponse {
@@ -132,6 +134,12 @@ export interface UnavailabilityResponse {
   start_time: string
   end_time: string
   recurring: string
+  reason: string | null
+}
+
+export interface UnavailabilitySlot {
+  start_time: string
+  end_time: string
   reason: string | null
 }
 

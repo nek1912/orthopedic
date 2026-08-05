@@ -5,8 +5,6 @@ import AdminTodayPage from './AdminTodayPage'
 import AdminPatientsPage from './AdminPatientsPage'
 import AdminSchedulePage from './AdminSchedulePage'
 import AdminSettingsPage from './AdminSettingsPage'
-import AdminServicesPage from './AdminServicesPage'
-import AdminPrescriptionsPage from './AdminPrescriptionsPage'
 
 export default function AdminDashboard() {
   return (
@@ -17,8 +15,6 @@ export default function AdminDashboard() {
         <Route path="requests" element={<AdminRequestsPage />} />
         <Route path="patients" element={<AdminPatientsPage />} />
         <Route path="schedule" element={<AdminSchedulePage />} />
-        <Route path="services" element={<AdminServicesPage />} />
-        <Route path="prescriptions" element={<AdminPrescriptionsPage />} />
         <Route path="settings" element={<AdminSettingsPage />} />
         <Route path="*" element={<Navigate to="/admin/today" replace />} />
       </Route>

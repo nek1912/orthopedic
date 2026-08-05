@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from app.schemas.auth import PatientResponse
 
@@ -10,12 +10,11 @@ class AdminLoginRequest(BaseModel):
 
 class ChangePasswordRequest(BaseModel):
     current_password: str
-    new_password: str
+    new_password: str = Field(min_length=8, max_length=128)
 
 
 class AdminLoginResponse(BaseModel):
     message: str = "Login successful"
-    access_token: str
 
 
 class AdminPatientResponse(PatientResponse):

@@ -53,7 +53,7 @@ function isTokenExpired(token: string): boolean {
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [patient, setPatient] = useState<PatientResponse | null>(getStoredPatient)
-  const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState(true)
 
   setTokenGetter(getStoredToken)
 
@@ -64,6 +64,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (!refresh) {
         clearStoredTokens()
         setPatient(null)
+        setLoading(false)
         return
       }
       fetch('/api/v1/auth/refresh', {
@@ -82,6 +83,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           clearStoredTokens()
           setPatient(null)
         })
+        .finally(() => setLoading(false))
+    } else {
+      setLoading(false)
     }
   }, [])
 

@@ -2,32 +2,13 @@ import { useEffect, useState, useRef, useCallback } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import Navbar from '@shared/components/Navbar'
 import Button from '@shared/components/Button'
-import { apiRequest } from '@shared/api/client'
-import type { ServiceResponse } from '@shared/types'
 import HeroSection from '@patient/components/HeroSection'
-import ServiceCard from '@patient/components/ServiceCard'
 import Footer from '@patient/components/Footer'
 import styles from './LandingPage.module.css'
 
 export default function LandingPage() {
   const navigate = useNavigate()
   const location = useLocation()
-  const [services, setServices] = useState<ServiceResponse[]>([])
-
-  useEffect(() => {
-    apiRequest<ServiceResponse[]>('/api/v1/services', { auth: false })
-      .then(setServices)
-      .catch(() => {
-        setServices([
-          { id: '1', name: 'General Dentistry', description: 'Checkups, Cleaning, Fillings & more', duration_minutes: 30, default_fee: 0, preparation_notes: null, requires_followup: false, is_active: true },
-          { id: '2', name: 'Dental Implants', description: 'Permanent solutions for missing teeth', duration_minutes: 30, default_fee: 0, preparation_notes: null, requires_followup: false, is_active: true },
-          { id: '3', name: 'Orthodontics', description: 'Braces & Aligners for a perfect smile', duration_minutes: 30, default_fee: 0, preparation_notes: null, requires_followup: false, is_active: true },
-          { id: '4', name: 'Cosmetic Dentistry', description: 'Smile Makeovers, Veneers, Whitening', duration_minutes: 30, default_fee: 0, preparation_notes: null, requires_followup: false, is_active: true },
-          { id: '5', name: 'Root Canal Treatment', description: 'Pain relief with precision care', duration_minutes: 30, default_fee: 0, preparation_notes: null, requires_followup: false, is_active: true },
-          { id: '6', name: 'Other Treatments', description: 'Not listed? Tell us your need', duration_minutes: 30, default_fee: 0, preparation_notes: null, requires_followup: false, is_active: true },
-        ])
-      })
-  }, [])
 
   useEffect(() => {
     const scrollTo = location.state?.scrollTo
@@ -43,10 +24,20 @@ export default function LandingPage() {
     }
   }, [location.state])
 
+  const conditions = [
+    { name: 'Knee Pain', icon: 'knee' },
+    { name: 'Back & Neck Pain', icon: 'spine' },
+    { name: 'Shoulder Pain', icon: 'shoulder' },
+    { name: 'Sports Injuries', icon: 'sports' },
+    { name: 'Fractures', icon: 'fracture' },
+    { name: 'Arthritis', icon: 'arthritis' },
+    { name: 'Joint Replacement', icon: 'joint' },
+  ]
+
   const testimonials = [
-    { quote: 'Excellent care, very polite staff and a comfortable experience. Highly recommend Dr. Aarav Mehta Dental Care.', name: 'Priya Sharma' },
-    { quote: 'Best dental experience I have ever had. The doctor is very skilled and the clinic is extremely hygienic and modern.', name: 'Rahul Verma' },
-    { quote: 'Got my root canal done here painlessly. The staff made sure I was comfortable throughout. Highly recommended!', name: 'Ananya Gupta' },
+    { quote: 'After years of knee pain, I finally got my life back. The treatment and care I received were exceptional.', name: 'Anjali Sharma', treatment: 'Knee Pain Treatment', rating: 5 },
+    { quote: 'Very professional and friendly doctor. Explained everything clearly and treated my back pain very effectively.', name: 'Ramesh Patel', treatment: 'Back Pain Treatment', rating: 5 },
+    { quote: 'The surgery and recovery guidance were excellent. I\'m now pain-free and walking daily.', name: 'Meena Iyer', treatment: 'Knee Replacement', rating: 5 },
   ]
 
   const [currentTestimonial, setCurrentTestimonial] = useState(0)
@@ -90,124 +81,85 @@ export default function LandingPage() {
       <main>
         <HeroSection />
 
-        <section id="services" className={styles.section}>
+        <section id="conditions" className={styles.section}>
           <div className={styles.container}>
-            <span className={styles.label}>What We Offer</span>
-            <h2 className={styles.sectionTitle}>Our Services</h2>
-            <div className={styles.servicesGrid}>
-              {services.map((s) => (
-                <ServiceCard key={s.id} service={s} />
+            <h2 className={styles.sectionTitle}>Conditions We Treat</h2>
+            <div className={styles.conditionsGrid}>
+              {conditions.map((c) => (
+                <div key={c.name} className={styles.conditionCard}>
+                  <div className={styles.conditionIcon}>
+                    {c.icon === 'knee' && (
+                      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                        <circle cx="12" cy="6" r="3" />
+                        <circle cx="12" cy="18" r="3" />
+                        <path d="M12 9v6" strokeWidth="2" strokeLinecap="round" />
+                      </svg>
+                    )}
+                    {c.icon === 'spine' && (
+                      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                        <rect x="9" y="3" width="6" height="3" rx="1" />
+                        <rect x="9" y="8" width="6" height="3" rx="1" />
+                        <rect x="9" y="13" width="6" height="3" rx="1" />
+                        <rect x="9" y="18" width="6" height="3" rx="1" />
+                        <line x1="12" y1="6" x2="12" y2="8" />
+                        <line x1="12" y1="11" x2="12" y2="13" />
+                        <line x1="12" y1="16" x2="12" y2="18" />
+                      </svg>
+                    )}
+                    {c.icon === 'shoulder' && (
+                      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                        <circle cx="12" cy="8" r="4" />
+                        <path d="M8 12L4 20" strokeLinecap="round" />
+                        <path d="M16 12L20 20" strokeLinecap="round" />
+                        <path d="M12 12V20" strokeLinecap="round" />
+                      </svg>
+                    )}
+                    {c.icon === 'sports' && (
+                      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                        <circle cx="12" cy="12" r="10" />
+                        <path d="M12 2C6.5 2 2 6.5 2 12" />
+                        <path d="M22 12C22 6.5 17.5 2 12 2" />
+                        <path d="M12 22C17.5 22 22 17.5 22 12" />
+                      </svg>
+                    )}
+                    {c.icon === 'fracture' && (
+                      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                        <path d="M6 4C5 4 4 5 4 6.5C4 8 5.5 9 7 10L17 14C18.5 15 20 16 20 17.5C20 19 19 20 18 20" strokeLinecap="round" />
+                        <path d="M12 9L10 12L13 15" strokeLinecap="round" strokeLinejoin="round" />
+                      </svg>
+                    )}
+                    {c.icon === 'arthritis' && (
+                      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                        <circle cx="12" cy="12" r="7" />
+                        <path d="M12 8V12L15 13" strokeLinecap="round" />
+                        <circle cx="12" cy="12" r="2" fill="currentColor" opacity="0.3" />
+                      </svg>
+                    )}
+                    {c.icon === 'joint' && (
+                      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                        <path d="M12 2a3 3 0 100 6 3 3 0 000-6z" />
+                        <path d="M17 11.5L12 9 7 11.5" strokeLinecap="round" strokeLinejoin="round" />
+                        <path d="M12 9v6" />
+                        <path d="M9 22l3-7 3 7" strokeLinecap="round" strokeLinejoin="round" />
+                      </svg>
+                    )}
+                  </div>
+                  <span className={styles.conditionName}>{c.name}</span>
+                </div>
               ))}
             </div>
+            <Button variant="secondary" size="default" onClick={() => document.getElementById('services')?.scrollIntoView({ behavior: 'smooth' })}>
+              View All Conditions
+            </Button>
           </div>
         </section>
 
-        <section id="about" className={`${styles.section} ${styles.doctorSection}`}>
-          <div className={styles.container}>
-            <div className={styles.doctorGrid}>
-              <div className={styles.doctorImage}>
-                <img
-                  src="https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?w=500&h=600&fit=crop&crop=top"
-                  alt="Dr. Aarav Mehta - Dental Surgeon"
-                  className={styles.doctorPhoto}
-                />
-              </div>
-              <div className={styles.doctorContent}>
-                <span className={styles.label}>About The Doctor</span>
-                <h2 className={styles.sectionTitle}>Care That Feels Personal</h2>
-                <p className={styles.doctorText}>
-                  Led by Dr. Aarav Mehta, our clinic is built on trust, transparency and the belief that every smile deserves the best care.
-                </p>
-                <ul className={styles.credentials}>
-                  <li>
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <path d="M22 11.08V12a10 10 0 11-5.93-9.14" />
-                      <polyline points="22 4 12 14.01 9 11.01" />
-                    </svg>
-                    <span>BDS, MDS — Conservative Dentistry</span>
-                  </li>
-                  <li>
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <path d="M22 11.08V12a10 10 0 11-5.93-9.14" />
-                      <polyline points="22 4 12 14.01 9 11.01" />
-                    </svg>
-                    <span>10+ Years of Clinical Experience</span>
-                  </li>
-                  <li>
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <path d="M22 11.08V12a10 10 0 11-5.93-9.14" />
-                      <polyline points="22 4 12 14.01 9 11.01" />
-                    </svg>
-                    <span>Modern Technology & Gentle Approach</span>
-                  </li>
-                </ul>
-                <Button variant="primary" size="default" onClick={() => document.getElementById('about')?.scrollIntoView({ behavior: 'smooth' })}>
-                  Know More About Dr. Aarav
-                </Button>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <section className={`${styles.section} ${styles.bookingSection}`}>
+        <section id="services" className={`${styles.section} ${styles.bookingSection}`}>
           <div className={styles.container}>
             <div className={styles.bookingGrid}>
-              <div className={styles.bookingCalendar}>
-                <div className={styles.calendarDemo}>
-                  <div className={styles.calendarNav}>
-                    <button className={styles.calendarArrow} aria-label="Previous month">
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <polyline points="15 18 9 12 15 6" />
-                      </svg>
-                    </button>
-                    <span className={styles.calendarMonth}>June 2025</span>
-                    <button className={styles.calendarArrow} aria-label="Next month">
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <polyline points="9 18 15 12 9 6" />
-                      </svg>
-                    </button>
-                  </div>
-                  <div className={styles.calendarGrid}>
-                    {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((d) => (
-                      <div key={d} className={styles.dayHeader}>{d}</div>
-                    ))}
-                    {Array.from({ length: 30 }, (_, i) => {
-                      const day = i + 1
-                      const hasDot = [3, 10, 17, 24].includes(day)
-                      const dotColor = day === 10 ? 'red' : day === 17 ? 'orange' : 'green'
-                      return (
-                        <div key={day} className={styles.calendarDay}>
-                          {day}
-                          {hasDot && <span className={`${styles.dot} ${styles[dotColor]}`} />}
-                        </div>
-                      )
-                    })}
-                  </div>
-                  <div className={styles.legend}>
-                    <span className={styles.legendItem}>
-                      <span className={`${styles.dot} ${styles.red}`} /> Very Busy
-                    </span>
-                    <span className={styles.legendItem}>
-                      <span className={`${styles.dot} ${styles.orange}`} /> Busy
-                    </span>
-                    <span className={styles.legendItem}>
-                      <span className={`${styles.dot} ${styles.yellow}`} /> Moderate
-                    </span>
-                    <span className={styles.legendItem}>
-                      <span className={`${styles.dot} ${styles.green}`} /> Available
-                    </span>
-                    <span className={styles.legendItem}>
-                      <span className={`${styles.dot} ${styles.gray}`} /> Closed
-                    </span>
-                  </div>
-                </div>
-              </div>
               <div className={styles.bookingContent}>
-                <span className={styles.label}>Easy Appointment Booking</span>
-                <h2 className={styles.sectionTitle}>Book Your Appointment In Just a Few Steps</h2>
-                <p className={styles.bookingText}>
-                  Select a date that works for you. We&apos;ll confirm your request after reviewing availability.
-                </p>
+                <span className={styles.label}>QUICK & EASY BOOKING</span>
+                <h2 className={styles.sectionTitle}>Book Your Appointment<br />in Just 3 Simple Steps</h2>
                 <div className={styles.steps}>
                   <div className={styles.step}>
                     <div className={styles.stepIcon}>
@@ -218,10 +170,16 @@ export default function LandingPage() {
                         <path d="M3 10h18" />
                       </svg>
                     </div>
-                    <div>
-                      <span className={styles.stepTitle}>Choose a Date</span>
-                      <span className={styles.stepText}>See crowd levels to pick the right day</span>
+                    <div className={styles.stepContent}>
+                      <span className={styles.stepNumber}>1</span>
+                      <span className={styles.stepTitle}>Choose Date</span>
+                      <span className={styles.stepText}>Select a convenient day from the calendar</span>
                     </div>
+                  </div>
+                  <div className={styles.stepArrow}>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                      <path d="M5 12h14M12 5l7 7-7 7" />
+                    </svg>
                   </div>
                   <div className={styles.step}>
                     <div className={styles.stepIcon}>
@@ -230,10 +188,16 @@ export default function LandingPage() {
                         <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z" />
                       </svg>
                     </div>
-                    <div>
-                      <span className={styles.stepTitle}>Tell Us Your Concern</span>
-                      <span className={styles.stepText}>Select a service and fill basic details</span>
+                    <div className={styles.stepContent}>
+                      <span className={styles.stepNumber}>2</span>
+                      <span className={styles.stepTitle}>Tell Us About You</span>
+                      <span className={styles.stepText}>Fill in a few basic details about your concern</span>
                     </div>
+                  </div>
+                  <div className={styles.stepArrow}>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                      <path d="M5 12h14M12 5l7 7-7 7" />
+                    </svg>
                   </div>
                   <div className={styles.step}>
                     <div className={styles.stepIcon}>
@@ -242,15 +206,67 @@ export default function LandingPage() {
                         <polyline points="22 4 12 14.01 9 11.01" />
                       </svg>
                     </div>
-                    <div>
-                      <span className={styles.stepTitle}>We&apos;ll Confirm</span>
-                      <span className={styles.stepText}>We&apos;ll review & confirm your appointment</span>
+                    <div className={styles.stepContent}>
+                      <span className={styles.stepNumber}>3</span>
+                      <span className={styles.stepTitle}>We Review & Confirm</span>
+                      <span className={styles.stepText}>We&apos;ll confirm your request and assign a time</span>
                     </div>
                   </div>
                 </div>
                 <Button variant="primary" size="default" onClick={() => navigate('/book')}>
-                  Book Your Appointment
+                  Book Appointment Now
                 </Button>
+                <span className={styles.freeText}>It&apos;s completely free!</span>
+              </div>
+              <div className={styles.bookingCalendar}>
+                <div className={styles.calendarDemo}>
+                  <div className={styles.calendarHeader}>
+                    <span className={styles.calendarTitle}>Select a Date</span>
+                  </div>
+                  <div className={styles.calendarNav}>
+                    <button className={styles.calendarArrow} aria-label="Previous month">
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <polyline points="15 18 9 12 15 6" />
+                      </svg>
+                    </button>
+                    <span className={styles.calendarMonth}>May 2026</span>
+                    <button className={styles.calendarArrow} aria-label="Next month">
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <polyline points="9 18 15 12 9 6" />
+                      </svg>
+                    </button>
+                  </div>
+                  <div className={styles.calendarGrid}>
+                    {['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'].map((d) => (
+                      <div key={d} className={styles.dayHeader}>{d}</div>
+                    ))}
+                    {Array.from({ length: 31 }, (_, i) => {
+                      const day = i + 1
+                      const hasDot = [3, 8, 9, 10, 13, 14, 15, 17, 18, 20, 22, 23, 24, 25, 27].includes(day)
+                      const isBusy = [8, 9, 10, 14, 15, 22, 23].includes(day)
+                      const isModerate = [13, 18, 24, 25, 27].includes(day)
+                      const isSelected = day === 20
+                      const dotColor = isBusy ? 'red' : isModerate ? 'orange' : 'green'
+                      return (
+                        <div key={day} className={`${styles.calendarDay} ${isSelected ? styles.selectedDay : ''}`}>
+                          {day}
+                          {hasDot && <span className={`${styles.dot} ${styles[dotColor]}`} />}
+                        </div>
+                      )
+                    })}
+                  </div>
+                  <div className={styles.legend}>
+                    <span className={styles.legendItem}>
+                      <span className={`${styles.dot} ${styles.red}`} /> Busy
+                    </span>
+                    <span className={styles.legendItem}>
+                      <span className={`${styles.dot} ${styles.orange}`} /> Moderate
+                    </span>
+                    <span className={styles.legendItem}>
+                      <span className={`${styles.dot} ${styles.green}`} /> Available
+                    </span>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -258,48 +274,99 @@ export default function LandingPage() {
 
         <section className={`${styles.section} ${styles.values}`}>
           <div className={styles.container}>
-            <h2 className={styles.sectionTitle}>Why Patients Choose Us</h2>
+            <span className={styles.label}>WHY PATIENTS CHOOSE US</span>
+            <h2 className={styles.sectionTitle}>Care That <span className={styles.highlight}>Moves</span> You Forward</h2>
             <div className={styles.valuesGrid}>
               <div className={styles.valueCard}>
                 <div className={styles.valueIcon}>
                   <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                    <circle cx="12" cy="12" r="10" />
-                    <path d="M12 6v6l4 2" />
+                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                    <line x1="12" y1="8" x2="12" y2="16"/>
+                    <line x1="8" y1="12" x2="16" y2="12"/>
                   </svg>
                 </div>
-                <h3 className={styles.valueTitle}>Minimal Waiting</h3>
-                <p className={styles.valueText}>Smart scheduling to reduce waiting time</p>
+                <h3 className={styles.valueTitle}>Accurate Diagnosis</h3>
+                <p className={styles.valueText}>Thorough evaluation using advanced imaging & clinical expertise.</p>
               </div>
               <div className={styles.valueCard}>
                 <div className={styles.valueIcon}>
                   <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                    <rect x="2" y="7" width="20" height="14" rx="2" />
-                    <path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16" />
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                    <circle cx="12" cy="7" r="4"/>
                   </svg>
                 </div>
-                <h3 className={styles.valueTitle}>Modern Clinic</h3>
-                <p className={styles.valueText}>Advanced equipment for better diagnosis</p>
+                <h3 className={styles.valueTitle}>Personalized Treatment</h3>
+                <p className={styles.valueText}>Tailored treatment plans designed for your unique needs.</p>
               </div>
               <div className={styles.valueCard}>
                 <div className={styles.valueIcon}>
                   <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                    <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
-                    <polyline points="14 2 14 8 20 8" />
-                    <line x1="16" y1="13" x2="8" y2="13" />
-                    <line x1="16" y1="17" x2="8" y2="17" />
+                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                    <polyline points="9 22 9 12 15 12 15 22"/>
                   </svg>
                 </div>
-                <h3 className={styles.valueTitle}>Transparent Care</h3>
-                <p className={styles.valueText}>Clear treatment plans & honest advice</p>
+                <h3 className={styles.valueTitle}>Modern Facilities</h3>
+                <p className={styles.valueText}>State-of-the-art equipment for better outcomes.</p>
               </div>
               <div className={styles.valueCard}>
                 <div className={styles.valueIcon}>
                   <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                    <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z" />
+                    <path d="M22 11.08V12a10 10 0 11-5.93-9.14"/>
+                    <polyline points="22 4 12 14.01 9 11.01"/>
                   </svg>
                 </div>
-                <h3 className={styles.valueTitle}>Comfort Focused</h3>
-                <p className={styles.valueText}>Pain-free, gentle & patient-friendly care</p>
+                <h3 className={styles.valueTitle}>Post-Treatment Support</h3>
+                <p className={styles.valueText}>Continuous guidance for a faster and safer recovery.</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section id="about" className={`${styles.section} ${styles.doctorSection}`}>
+          <div className={styles.container}>
+            <div className={styles.doctorGrid}>
+              <div className={styles.doctorImage}>
+                <img
+                  src="https://images.unsplash.com/photo-1622253692010-333f2da6031d?w=500&h=600&fit=crop&crop=top"
+                  alt="Dr. Rahul Mehta - Consultant Orthopedic Surgeon"
+                  className={styles.doctorPhoto}
+                />
+              </div>
+              <div className={styles.doctorContent}>
+                <span className={styles.label}>MEET YOUR DOCTOR</span>
+                <h2 className={styles.doctorName}>Dr. Rahul Mehta</h2>
+                <p className={styles.doctorTitle}>Consultant Orthopedic Surgeon</p>
+                <p className={styles.doctorText}>
+                  With over 15 years of experience in orthopedic care, Dr. Rahul Mehta specializes in joint preservation, sports injury management, arthroscopy, and joint replacement surgeries. His patient-first approach ensures the best possible outcomes for pain-free living.
+                </p>
+                <div className={styles.credentials}>
+                  <div className={styles.credential}>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                      <path d="M22 11.08V12a10 10 0 11-5.93-9.14" />
+                      <polyline points="22 4 12 14.01 9 11.01" />
+                    </svg>
+                    <span>MBBS, MS (Orthopedics)</span>
+                  </div>
+                  <div className={styles.credential}>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                      <circle cx="12" cy="12" r="10" />
+                      <path d="M12 6v6l4 2" />
+                    </svg>
+                    <span>15+ Years Experience</span>
+                  </div>
+                  <div className={styles.credential}>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                      <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" />
+                      <circle cx="9" cy="7" r="4" />
+                      <path d="M23 21v-2a4 4 0 00-3-3.87" />
+                      <path d="M16 3.13a4 4 0 010 7.75" />
+                    </svg>
+                    <span>5000+ Patients Treated</span>
+                  </div>
+                </div>
+                <Button variant="primary" size="default" onClick={() => document.getElementById('about')?.scrollIntoView({ behavior: 'smooth' })}>
+                  Know More About Dr. Mehta
+                </Button>
               </div>
             </div>
           </div>
@@ -307,30 +374,86 @@ export default function LandingPage() {
 
         <section className={`${styles.section} ${styles.testimonialSection}`}>
           <div className={styles.container}>
+            <span className={styles.label}>WHAT PATIENTS SAY</span>
+            <h2 className={styles.sectionTitle}>Real Stories. Real Recoveries.</h2>
             <div
-              className={styles.testimonialCard}
+              className={styles.testimonialGrid}
               onTouchStart={onTouchStart}
               onTouchMove={onTouchMove}
               onTouchEnd={onTouchEnd}
             >
-              <svg className={styles.quoteIcon} width="32" height="32" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z" />
-              </svg>
-              <blockquote className={styles.quote} key={currentTestimonial}>
-                {testimonials[currentTestimonial].quote}
-              </blockquote>
-              <div className={styles.author}>
-                <span className={styles.authorName}>— {testimonials[currentTestimonial].name}</span>
+              {testimonials.map((t, i) => (
+                <div key={i} className={styles.testimonialCard}>
+                  <div className={styles.stars}>
+                    {Array.from({ length: t.rating }, (_, j) => (
+                      <svg key={j} width="16" height="16" viewBox="0 0 24 24" fill="#F59E0B" stroke="#F59E0B" strokeWidth="1">
+                        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                      </svg>
+                    ))}
+                  </div>
+                  <blockquote className={styles.quote}>
+                    &ldquo;{t.quote}&rdquo;
+                  </blockquote>
+                  <div className={styles.author}>
+                    <span className={styles.authorName}>— {t.name}</span>
+                    <span className={styles.authorTreatment}>{t.treatment}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div className={styles.pagination}>
+              {testimonials.map((_, i) => (
+                <button
+                  key={i}
+                  className={`${styles.pageDot} ${i === currentTestimonial ? styles.activeDot : ''}`}
+                  onClick={() => goTo(i)}
+                  aria-label={`Go to testimonial ${i + 1}`}
+                />
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <section className={`${styles.section} ${styles.faqSection}`}>
+          <div className={styles.container}>
+            <span className={styles.label}>FREQUENTLY ASKED QUESTIONS</span>
+            <h2 className={styles.sectionTitle}>Your Questions, Answered</h2>
+            <div className={styles.faqGrid}>
+              <div className={styles.faqCol}>
+                <div className={styles.faqItem}>
+                  <span className={styles.faqQuestion}>Is the consultation really free?</span>
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M12 5v14M5 12h14"/></svg>
+                </div>
+                <div className={styles.faqItem}>
+                  <span className={styles.faqQuestion}>How do I book an appointment?</span>
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M12 5v14M5 12h14"/></svg>
+                </div>
+                <div className={styles.faqItem}>
+                  <span className={styles.faqQuestion}>What should I carry during my visit?</span>
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M12 5v14M5 12h14"/></svg>
+                </div>
+                <div className={styles.faqItem}>
+                  <span className={styles.faqQuestion}>How will I be notified about confirmation?</span>
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M12 5v14M5 12h14"/></svg>
+                </div>
               </div>
-              <div className={styles.pagination}>
-                {testimonials.map((_, i) => (
-                  <button
-                    key={i}
-                    className={`${styles.pageDot} ${i === currentTestimonial ? styles.activeDot : ''}`}
-                    onClick={() => goTo(i)}
-                    aria-label={`Go to testimonial ${i + 1}`}
-                  />
-                ))}
+              <div className={styles.faqCol}>
+                <div className={styles.faqItem}>
+                  <span className={styles.faqQuestion}>Can I reschedule my appointment?</span>
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M12 5v14M5 12h14"/></svg>
+                </div>
+                <div className={styles.faqItem}>
+                  <span className={styles.faqQuestion}>What types of orthopedic conditions do you treat?</span>
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M12 5v14M5 12h14"/></svg>
+                </div>
+                <div className={styles.faqItem}>
+                  <span className={styles.faqQuestion}>Do you provide online consultation?</span>
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M12 5v14M5 12h14"/></svg>
+                </div>
+                <div className={styles.faqItem}>
+                  <span className={styles.faqQuestion}>What if I have insurance?</span>
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M12 5v14M5 12h14"/></svg>
+                </div>
               </div>
             </div>
           </div>
@@ -339,57 +462,15 @@ export default function LandingPage() {
         <section className={styles.ctaBanner}>
           <div className={styles.container}>
             <div className={styles.ctaBannerContent}>
-              <div className={styles.ctaBannerIcon}>
-                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                  <path d="M19 14c1.49-1.46 3-3.21 3-5.5A4.5 4.5 0 0017.5 4c-1.6 0-3.04.82-3.84 2.05" />
-                  <path d="M7.34 6.05C6.54 4.82 5.1 4 3.5 4A4.5 4.5 0 002 8.5c0 2.29 1.51 4.04 3 5.5" />
-                  <path d="M12 20c-3 0-5.5-2.5-5.5-5.5" />
-                  <path d="M12 20c3 0 5.5-2.5 5.5-5.5" />
-                </svg>
-              </div>
               <div className={styles.ctaBannerText}>
-                <h3>Your smile is our priority.</h3>
-                <p>We&apos;re here to help you smile with confidence.</p>
+                <h3>Take the first step towards a pain-free life.</h3>
+                <p>We&apos;re here to help you move better, live better.</p>
               </div>
-              <Button variant="primary" size="default" onClick={() => navigate('/book')}>
-                Book Appointment Now
-              </Button>
-            </div>
-          </div>
-        </section>
-
-        <section id="contact" className={styles.section}>
-          <div className={styles.container}>
-            <h2 className={styles.sectionTitle}>Get In Touch</h2>
-            <div className={styles.contactGrid}>
-              <div className={styles.contactCard}>
-                <div className={styles.contactIcon}>
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                    <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z" />
-                  </svg>
-                </div>
-                <h3 className={styles.valueTitle}>Phone</h3>
-                <p className={styles.valueText}>+91 98765 43210</p>
-              </div>
-              <div className={styles.contactCard}>
-                <div className={styles.contactIcon}>
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" />
-                    <circle cx="12" cy="10" r="3" />
-                  </svg>
-                </div>
-                <h3 className={styles.valueTitle}>Address</h3>
-                <p className={styles.valueText}>123 Dental Lane, Mumbai, Maharashtra 400001</p>
-              </div>
-              <div className={styles.contactCard}>
-                <div className={styles.contactIcon}>
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                    <circle cx="12" cy="12" r="10" />
-                    <polyline points="12 6 12 12 16 14" />
-                  </svg>
-                </div>
-                <h3 className={styles.valueTitle}>Hours</h3>
-                <p className={styles.valueText}>Mon - Sat: 9:00 AM - 7:00 PM</p>
+              <div className={styles.ctaBannerActions}>
+                <Button variant="primary" size="default" onClick={() => navigate('/book')}>
+                  Book Appointment Now
+                </Button>
+                <span className={styles.ctaPhone}>or Call Us: +91 98765 43210</span>
               </div>
             </div>
           </div>

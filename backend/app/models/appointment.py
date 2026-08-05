@@ -1,6 +1,6 @@
 import enum
 import uuid
-from datetime import date, datetime, time
+from datetime import date, datetime, time, timezone
 
 from sqlalchemy import Date, DateTime, Enum as SAEnum, ForeignKey, String, Text, Time
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -31,9 +31,9 @@ class Appointment(Base):
     time_slot_end: Mapped[time | None] = mapped_column(Time, nullable=True)
     notes: Mapped[str | None] = mapped_column(Text, nullable=True)
     arrived_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
-    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=datetime.now)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
     updated_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), default=datetime.now, onupdate=datetime.now
+        DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc)
     )
 
     patient = relationship("Patient", back_populates="appointments")

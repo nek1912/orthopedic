@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { apiRequest } from '@shared/api/client'
 import type { ServiceResponse } from '@shared/types'
-import { CheckupIcon, CleaningIcon, FillingIcon, RootCanalIcon, ToothIcon } from '@shared/components/Icons'
+import { CheckupIcon, SportsMedicineIcon, FractureIcon, SpineIcon, JointIcon } from '@shared/components/Icons'
 import styles from './ServiceSelector.module.css'
 
 interface ServiceSelectorProps {
@@ -12,31 +12,22 @@ interface ServiceSelectorProps {
 }
 
 const SERVICE_ICONS: Record<string, React.ReactNode> = {
-  'dental checkup': <CheckupIcon className={styles.cardIcon} />,
-  'checkup': <CheckupIcon className={styles.cardIcon} />,
-  'general': <CheckupIcon className={styles.cardIcon} />,
-  'teeth cleaning': <CleaningIcon className={styles.cardIcon} />,
-  'cleaning': <CleaningIcon className={styles.cardIcon} />,
-  'scaling': <CleaningIcon className={styles.cardIcon} />,
-  'filling': <FillingIcon className={styles.cardIcon} />,
-  'root canal': <RootCanalIcon className={styles.cardIcon} />,
-  'implant': <ToothIcon className={styles.cardIcon} />,
-  'orthodont': <ToothIcon className={styles.cardIcon} />,
-  'braces': <ToothIcon className={styles.cardIcon} />,
-  'aligner': <ToothIcon className={styles.cardIcon} />,
-  'cosmetic': <ToothIcon className={styles.cardIcon} />,
-  'whitening': <ToothIcon className={styles.cardIcon} />,
-  'veneer': <ToothIcon className={styles.cardIcon} />,
+  'joint': <CheckupIcon className={styles.cardIcon} />,
+  'sports': <SportsMedicineIcon className={styles.cardIcon} />,
+  'fracture': <FractureIcon className={styles.cardIcon} />,
+  'spine': <SpineIcon className={styles.cardIcon} />,
+  'arthritis': <JointIcon className={styles.cardIcon} />,
+  'rehab': <JointIcon className={styles.cardIcon} />,
 }
 
 const FALLBACK_ICONS: Record<number, React.ReactNode> = {
   0: <CheckupIcon className={styles.cardIcon} />,
-  1: <ToothIcon className={styles.cardIcon} />,
-  2: <ToothIcon className={styles.cardIcon} />,
-  3: <ToothIcon className={styles.cardIcon} />,
-  4: <RootCanalIcon className={styles.cardIcon} />,
-  5: <CleaningIcon className={styles.cardIcon} />,
-  6: <FillingIcon className={styles.cardIcon} />,
+  1: <JointIcon className={styles.cardIcon} />,
+  2: <JointIcon className={styles.cardIcon} />,
+  3: <JointIcon className={styles.cardIcon} />,
+  4: <SpineIcon className={styles.cardIcon} />,
+  5: <SportsMedicineIcon className={styles.cardIcon} />,
+  6: <FractureIcon className={styles.cardIcon} />,
 }
 
 export default function ServiceSelector({
@@ -52,11 +43,12 @@ export default function ServiceSelector({
       .then(setServices)
       .catch(() => {
         setServices([
-          { id: '1', name: 'General Dentistry', description: 'Checkups, Cleaning, Fillings & more', duration_minutes: 30, default_fee: 0, preparation_notes: null, requires_followup: false, is_active: true },
-          { id: '2', name: 'Dental Implants', description: 'Permanent solutions for missing teeth', duration_minutes: 30, default_fee: 0, preparation_notes: null, requires_followup: false, is_active: true },
-          { id: '3', name: 'Orthodontics', description: 'Braces & Aligners for a perfect smile', duration_minutes: 30, default_fee: 0, preparation_notes: null, requires_followup: false, is_active: true },
-          { id: '4', name: 'Cosmetic Dentistry', description: 'Smile Makeovers, Veneers, Whitening', duration_minutes: 30, default_fee: 0, preparation_notes: null, requires_followup: false, is_active: true },
-          { id: '5', name: 'Root Canal Treatment', description: 'Pain relief with precision care', duration_minutes: 30, default_fee: 0, preparation_notes: null, requires_followup: false, is_active: true },
+          { id: '00000000-0000-0000-0000-000000000001', name: 'Joint Replacement', description: 'Hip, Knee, Shoulder Consultation & Surgery', duration_minutes: 30, default_fee: 0, preparation_notes: null, requires_followup: false, is_active: true },
+          { id: '00000000-0000-0000-0000-000000000002', name: 'Sports Injury & Arthroscopy', description: 'Minimally Invasive Ligament & Joint Repair', duration_minutes: 30, default_fee: 0, preparation_notes: null, requires_followup: false, is_active: true },
+          { id: '00000000-0000-0000-0000-000000000003', name: 'Fracture & Trauma Care', description: 'Bone Setting, Casting & Emergency Care', duration_minutes: 30, default_fee: 0, preparation_notes: null, requires_followup: false, is_active: true },
+          { id: '00000000-0000-0000-0000-000000000004', name: 'Spine & Back Pain Care', description: 'Disc, Vertebral & Sciatica Management', duration_minutes: 30, default_fee: 0, preparation_notes: null, requires_followup: false, is_active: true },
+          { id: '00000000-0000-0000-0000-000000000005', name: 'Arthritis & Pain Relief', description: 'Joint Injections, Pain Therapy & Care', duration_minutes: 30, default_fee: 0, preparation_notes: null, requires_followup: false, is_active: true },
+          { id: '00000000-0000-0000-0000-000000000006', name: 'Rehab & Mobility Check', description: 'Post-op Physical Therapy & Alignment', duration_minutes: 30, default_fee: 0, preparation_notes: null, requires_followup: false, is_active: true },
         ])
       })
   }, [])
@@ -92,17 +84,17 @@ export default function ServiceSelector({
           type="button"
         >
           <span className={styles.iconWrap}>
-            <ToothIcon className={styles.cardIcon} />
+            <JointIcon className={styles.cardIcon} />
           </span>
-          <span className={styles.name}>Other</span>
-          <span className={styles.desc}>Describe your concern</span>
+          <span className={styles.name}>Other Concern</span>
+          <span className={styles.desc}>Describe your orthopedic concern</span>
         </button>
       </div>
 
       {isOther && (
         <textarea
           className={styles.textarea}
-          placeholder="Describe your dental concern..."
+          placeholder="Describe your joint, bone, or orthopedic concern..."
           value={customDescription}
           onChange={(e) => onCustomDescription(e.target.value)}
           rows={3}

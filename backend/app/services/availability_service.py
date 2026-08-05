@@ -45,15 +45,25 @@ async def get_calendar(db: AsyncSession, year_month: str) -> dict:
         else:
             level = "red"
 
-        blocked = any(
-            _is_unavailable_for_date(u, current_date)
-            for u in all_unavailability
-        )
+        full_day_blocked = False
+        partial_hours = []
+        for u in all_unavailability:
+            if _is_unavailable_for_date(u, current_date):
+                is_full_day = str(u.start_time) == "00:00:00" and str(u.end_time) == "23:59:00"
+                if is_full_day:
+                    full_day_blocked = True
+                else:
+                    partial_hours.append({
+                        "start_time": str(u.start_time),
+                        "end_time": str(u.end_time),
+                        "reason": u.reason,
+                    })
 
         result[current_date.isoformat()] = {
             "count": count,
             "level": level,
-            "blocked": blocked,
+            "blocked": full_day_blocked,
+            "unavailable_hours": partial_hours if not full_day_blocked else [],
         }
 
     return result
@@ -63,6 +73,8 @@ def _is_unavailable_for_date(
     u: DoctorUnavailability,
     target_date: date,
 ) -> bool:
+    if target_date < u.date:
+        return False
     if u.recurring == RecurringEnum.none:
         return u.date == target_date
     if u.recurring == RecurringEnum.weekly:

@@ -18,6 +18,10 @@ from app.schemas.service import ServiceResponse
 router = APIRouter(prefix="/admin/search", tags=["admin-search"])
 
 
+def _escape_like(s: str) -> str:
+    return s.replace('%', '\\%').replace('_', '\\_')
+
+
 def _patient_response(p: Patient) -> PatientResponse:
     return PatientResponse(
         id=str(p.id),
@@ -71,17 +75,17 @@ async def global_search(
     if not q or not q.strip():
         return SearchResponse()
 
-    pattern = f"%{q.strip()}%"
+    pattern = f"%{_escape_like(q.strip())}%"
 
     patients = (
         await db.execute(
             select(Patient)
             .where(
-                Patient.name.ilike(pattern)
-                | Patient.email.ilike(pattern)
+                Patient.name.ilike(pattern, escape='\\')
+                | Patient.email.ilike(pattern, escape='\\')
                 | (
                     Patient.phone.isnot(None)
-                    & Patient.phone.ilike(pattern)
+                    & Patient.phone.ilike(pattern, escape='\\')
                 )
             )
             .order_by(Patient.created_at.desc())
@@ -92,7 +96,7 @@ async def global_search(
     services = (
         await db.execute(
             select(Service)
-            .where(Service.name.ilike(pattern))
+            .where(Service.name.ilike(pattern, escape='\\'))
             .order_by(Service.name)
             .limit(5)
         )
@@ -103,10 +107,10 @@ async def global_search(
             select(Appointment)
             .options(selectinload(Appointment.patient), selectinload(Appointment.service))
             .where(
-                Patient.name.ilike(pattern)
-                | func.cast(Appointment.requested_date, String).ilike(pattern)
-                | func.cast(Appointment.status, String).ilike(pattern)
-                | Service.name.ilike(pattern)
+                Patient.name.ilike(pattern, escape='\\')
+                | func.cast(Appointment.requested_date, String).ilike(pattern, escape='\\')
+                | func.cast(Appointment.status, String).ilike(pattern, escape='\\')
+                | Service.name.ilike(pattern, escape='\\')
             )
             .join(Appointment.patient)
             .outerjoin(Appointment.service)

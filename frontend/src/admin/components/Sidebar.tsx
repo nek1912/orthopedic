@@ -11,8 +11,6 @@ const NAV_ITEMS = [
   { path: '/admin/requests', label: 'Appointment Requests', icon: 'requests' },
   { path: '/admin/patients', label: 'Patients', icon: 'patients' },
   { path: '/admin/schedule', label: 'Schedule', icon: 'schedule' },
-  { path: '/admin/services', label: 'Services', icon: 'services' },
-  { path: '/admin/prescriptions', label: 'Prescriptions', icon: 'prescriptions' },
   { path: '/admin/settings', label: 'Clinic Settings', icon: 'settings' },
 ]
 
@@ -20,7 +18,7 @@ const MOBILE_ITEMS = [
   { path: '/admin/today', label: 'Queue', icon: 'queue' },
   { path: '/admin/requests', label: 'Requests', icon: 'requests' },
   { path: '/admin/patients', label: 'Patients', icon: 'patients' },
-  { path: '/admin/settings', label: 'Settings', icon: 'settings' },
+  { path: '/admin/schedule', label: 'Schedule', icon: 'schedule' },
 ]
 
 function getIcon(type: string) {
@@ -73,7 +71,7 @@ export default function Sidebar() {
         </div>
         <div className={styles.footer}>
           <div className={styles.adminInfo}>
-            <div className={styles.adminName}>Dr. Rahul Patel</div>
+            <div className={styles.adminName}>Dr. Aarav Mehta</div>
             <div className={styles.adminRole}>Administrator</div>
             <div className={styles.clinicStatus}>
               <span className={styles.statusDot} />

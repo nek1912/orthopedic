@@ -49,8 +49,10 @@ function AppointmentsIllustration() {
 function DefaultIllustration() {
   return (
     <svg width="80" height="80" viewBox="0 0 80 80" fill="none">
-      <path d="M40 12C32 12 26 16 23 22C20 28 20 34 22 40C24 46 26 52 30 56C32 58 34 60 36 60C38 60 39 58 40 56C41 58 42 60 44 60C46 60 48 58 50 56C54 52 56 46 58 40C60 34 60 28 57 22C54 16 48 12 40 12Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-      <path d="M34 36C34 36 36 40 40 40C44 40 46 36 46 36" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+      <rect x="24" y="12" width="32" height="56" rx="4" stroke="currentColor" strokeWidth="2"/>
+      <path d="M32 28H48" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+      <path d="M32 40H48" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+      <path d="M32 52H40" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
     </svg>
   )
 }

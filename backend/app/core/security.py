@@ -4,7 +4,7 @@ import uuid
 import bcrypt
 from fastapi import Depends, HTTPException, Request, Response
 from fastapi.security import OAuth2PasswordBearer
-from jose import JWTError, jwt
+import jwt
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -42,7 +42,7 @@ def decode_token(token: str) -> dict | None:
     try:
         payload = jwt.decode(token, settings.JWT_SECRET, algorithms=[settings.JWT_ALGORITHM])
         return payload
-    except JWTError:
+    except jwt.exceptions.PyJWTError:
         return None
 
 
@@ -89,16 +89,27 @@ async def get_current_admin(
     admin = result.scalar_one_or_none()
     if admin is None:
         raise HTTPException(status_code=401, detail="Admin not found")
+    token_version = payload.get("token_version", 0)
+    if token_version != (admin.token_version or 0):
+        raise HTTPException(status_code=401, detail="Session invalidated")
     remember_me = payload.get("remember_me", False)
+    exp = payload.get("exp")
+    if exp:
+        exp_dt = datetime.fromtimestamp(exp, tz=timezone.utc)
+        now = datetime.now(timezone.utc)
+        remaining = exp_dt - now
+        total = timedelta(days=30 if remember_me else 1)
+        if remaining > total * 0.25:
+            return admin
     max_age = 30 * 24 * 60 * 60 if remember_me else 24 * 60 * 60
     from app.services.auth_service import create_admin_token
-    new_token = create_admin_token(int(admin_id), remember_me)["access_token"]
+    new_token = create_admin_token(int(admin_id), remember_me, token_version=admin.token_version or 0)["access_token"]
     response.set_cookie(
         key=settings.ADMIN_COOKIE_NAME,
         value=new_token,
         httponly=True,
         samesite="lax",
-        secure=False,
+        secure=settings.cookie_secure,
         max_age=max_age,
         path="/",
     )

@@ -37,7 +37,7 @@ function HashLink({ to, className, onClick, children }: { to: string; className?
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
-  const { isAuthenticated, patient, logout } = useAuth()
+  const { isAuthenticated } = useAuth()
   const navigate = useNavigate()
 
   useEffect(() => {
@@ -51,12 +51,17 @@ export default function Navbar() {
       <div className={styles.inner}>
         <Link to="/" className={styles.logo}>
           <div className={styles.logoRow}>
-            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className={styles.logoIcon}>
-              <path d="M12 2C8.5 2 6 4.5 6 7c0 2.5 1.5 4 2.5 5l.5.5v4a1 1 0 001 1h4a1 1 0 001-1v-4l.5-.5c1-1 2.5-2.5 2.5-5 0-2.5-2.5-5-6-5z" />
-            </svg>
+            <div className={styles.logoIcon}>
+              <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+                <circle cx="20" cy="20" r="19" stroke="#0F2537" strokeWidth="2" fill="none" />
+                <path d="M20 8C16.5 8 14 10.5 14 14C14 17.5 16.5 20 20 20C23.5 20 26 17.5 26 14C26 10.5 23.5 8 20 8Z" stroke="#0F2537" strokeWidth="1.5" fill="none" />
+                <path d="M20 20V32" stroke="#0F2537" strokeWidth="2" strokeLinecap="round" />
+                <path d="M16 28H24" stroke="#0F2537" strokeWidth="1.5" strokeLinecap="round" />
+              </svg>
+            </div>
             <div className={styles.logoText}>
-              <span className={styles.logoName}>Dr. Aarav Mehta</span>
-              <span className={styles.logoSub}>Dental Care</span>
+              <span className={styles.logoName}>Dr. Rahul Mehta</span>
+              <span className={styles.logoSub}>ORTHOPEDIC CARE</span>
             </div>
           </div>
         </Link>
@@ -74,18 +79,18 @@ export default function Navbar() {
           <HashLink to="/" className={styles.link} onClick={() => setMenuOpen(false)}>
             Home
           </HashLink>
-          <HashLink to="/#services" className={styles.link} onClick={() => setMenuOpen(false)}>
-            Services
-          </HashLink>
           <HashLink to="/#about" className={styles.link} onClick={() => setMenuOpen(false)}>
             About
           </HashLink>
-          <HashLink to="/#values" className={styles.link} onClick={() => setMenuOpen(false)}>
-            Why Us
+          <HashLink to="/#conditions" className={styles.link} onClick={() => setMenuOpen(false)}>
+            Conditions We Treat
           </HashLink>
-          <Link to="/book" className={styles.link} onClick={() => setMenuOpen(false)}>
-            Book Appointment
-          </Link>
+          <HashLink to="/#services" className={styles.link} onClick={() => setMenuOpen(false)}>
+            Services
+          </HashLink>
+          <HashLink to="/#patient-guide" className={styles.link} onClick={() => setMenuOpen(false)}>
+            Patient Guide
+          </HashLink>
           <HashLink to="/#contact" className={styles.link} onClick={() => setMenuOpen(false)}>
             Contact
           </HashLink>
@@ -94,14 +99,21 @@ export default function Navbar() {
         <div className={styles.actions}>
           {isAuthenticated ? (
             <>
-              <span className={styles.greeting}>Hi, {patient?.name?.split(' ')[0]}</span>
-              <Button variant="ghost" size="small" onClick={() => { logout(); setMenuOpen(false) }}>
-                Sign Out
+              <Button variant="primary" size="small" onClick={() => { navigate('/my-appointments'); setMenuOpen(false) }}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                  <circle cx="12" cy="7" r="4" />
+                </svg>
+                My Appointments
               </Button>
             </>
           ) : (
-            <Button variant="secondary" size="small" onClick={() => { navigate('/login'); setMenuOpen(false) }}>
-              Login / Register
+            <Button variant="primary" size="small" onClick={() => { navigate('/login'); setMenuOpen(false) }}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                <circle cx="12" cy="7" r="4" />
+              </svg>
+              Book Appointment
             </Button>
           )}
         </div>

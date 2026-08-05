@@ -1,12 +1,12 @@
 from datetime import date, datetime
 
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, Field
 
 
 class RegisterRequest(BaseModel):
     name: str
     email: EmailStr
-    password: str
+    password: str = Field(min_length=8, max_length=128)
     phone: str | None = None
     dob: date | None = None
 

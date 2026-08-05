@@ -1,4 +1,5 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
+from app.core.rate_limit import limiter
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -16,15 +17,16 @@ router = APIRouter(prefix="/auth", tags=["auth"])
 
 
 @router.post("/register", response_model=AuthResponse)
-async def register(request: RegisterRequest, db: AsyncSession = Depends(get_db)):
+@limiter.limit("3/hour")
+async def register(request: Request, register_request: RegisterRequest, db: AsyncSession = Depends(get_db)):
     try:
         result = await register_patient(
             db=db,
-            email=request.email,
-            password=request.password,
-            name=request.name,
-            phone=request.phone,
-            dob=request.dob,
+            email=register_request.email,
+            password=register_request.password,
+            name=register_request.name,
+            phone=register_request.phone,
+            dob=register_request.dob,
         )
     except ValueError as e:
         raise HTTPException(status_code=409, detail=str(e))
@@ -46,8 +48,9 @@ async def register(request: RegisterRequest, db: AsyncSession = Depends(get_db))
 
 
 @router.post("/login", response_model=AuthResponse)
-async def login(request: LoginRequest, db: AsyncSession = Depends(get_db)):
-    patient = await authenticate_patient(db, request.email, request.password)
+@limiter.limit("10/minute")
+async def login(request: Request, login_request: LoginRequest, db: AsyncSession = Depends(get_db)):
+    patient = await authenticate_patient(db, login_request.email, login_request.password)
     if patient is None:
         raise HTTPException(status_code=401, detail="Invalid email or password")
 

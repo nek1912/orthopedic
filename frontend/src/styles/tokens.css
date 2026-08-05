@@ -1,37 +1,37 @@
 :root {
-  /* Colors — Warm Clinic Palette */
-  --color-surface: #FBFAF7;
+  /* Colors — Orthopedic Clinical Palette */
+  --color-surface: #F8FAFC;
   --color-surface-elevated: #FFFFFF;
-  --color-surface-muted: #F4F0E8;
-  --color-primary: #1F3A3A;
-  --color-primary-hover: #123131;
-  --color-accent: #7C6A57;
-  --color-accent-hover: #6B5A48;
-  --color-text: #3B4342;
-  --color-text-secondary: #6D7473;
-  --color-text-muted: #A9B0AE;
-  --color-border: #E7DDD1;
-  --color-border-light: #F0EDE6;
-  --color-success: #2E7D6B;
-  --color-warning: #C8892B;
-  --color-danger: #B54848;
-  --color-info: #4A6FA5;
-  --color-focus: #4A9E8E;
+  --color-surface-muted: #F1F5F9;
+  --color-primary: #0F2537;
+  --color-primary-hover: #091724;
+  --color-accent: #1E40AF;
+  --color-accent-hover: #1D4ED8;
+  --color-text: #1E293B;
+  --color-text-secondary: #475569;
+  --color-text-muted: #94A3B8;
+  --color-border: #E2E8F0;
+  --color-border-light: #F1F5F9;
+  --color-success: #15803D;
+  --color-warning: #D97706;
+  --color-danger: #DC2626;
+  --color-info: #2563EB;
+  --color-focus: #3B82F6;
 
-  /* Colors — Sidebar (Dark Teal) */
-  --color-sidebar: #1a2e2e;
-  --color-sidebar-hover: #243d3d;
-  --color-sidebar-active: #2d4a4a;
-  --color-sidebar-text: rgba(255, 255, 255, 0.85);
-  --color-sidebar-text-muted: rgba(255, 255, 255, 0.55);
+  /* Colors — Sidebar (Deep Navy) */
+  --color-sidebar: #0B1929;
+  --color-sidebar-hover: #132A42;
+  --color-sidebar-active: #1C3B5E;
+  --color-sidebar-text: rgba(255, 255, 255, 0.88);
+  --color-sidebar-text-muted: rgba(255, 255, 255, 0.60);
 
   /* Colors — Queue Status */
-  --color-queue-accepted: #1a2e2e;
-  --color-queue-arrived: #2E7D6B;
-  --color-queue-waiting: #C8892B;
-  --color-queue-completed: #6B7280;
-  --color-queue-blocked: #B54848;
-  --color-queue-available: #E5E7EB;
+  --color-queue-accepted: #0F2537;
+  --color-queue-arrived: #15803D;
+  --color-queue-waiting: #D97706;
+  --color-queue-completed: #64748B;
+  --color-queue-blocked: #DC2626;
+  --color-queue-available: #E2E8F0;
 
   /* Shadows — Warm tinted */
   --shadow-sm: 0 1px 3px rgba(31, 58, 58, 0.06), 0 1px 2px rgba(31, 58, 58, 0.04);

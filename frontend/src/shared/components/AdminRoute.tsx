@@ -14,6 +14,13 @@ export default function AdminRoute() {
     })
   }, [checkAuth])
 
+  useEffect(() => {
+    const interval = setInterval(() => {
+      checkAuth().then((ok) => setValid(ok))
+    }, 5 * 60 * 1000)
+    return () => clearInterval(interval)
+  }, [checkAuth])
+
   if (checking) {
     return <div className="page-loading" />
   }

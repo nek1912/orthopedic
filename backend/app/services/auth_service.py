@@ -66,13 +66,13 @@ def create_patient_tokens(patient_id: str) -> dict:
     return {"access_token": access_token, "refresh_token": refresh_token, "token_type": "bearer"}
 
 
-def create_admin_token(admin_id: int, remember_me: bool = False) -> dict:
+def create_admin_token(admin_id: int, remember_me: bool = False, token_version: int = 0) -> dict:
     if remember_me:
         expires_delta = timedelta(days=settings.ADMIN_ACCESS_TOKEN_EXPIRE_DAYS)
     else:
         expires_delta = timedelta(days=1)
     access_token = create_access_token(
-        data={"sub": str(admin_id), "type": "admin_access", "remember_me": remember_me},
+        data={"sub": str(admin_id), "type": "admin_access", "remember_me": remember_me, "token_version": token_version},
         expires_delta=expires_delta,
     )
     return {"access_token": access_token}

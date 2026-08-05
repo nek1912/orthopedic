@@ -11,52 +11,39 @@ interface AdminAuthContextValue {
 
 const AdminAuthContext = createContext<AdminAuthContextValue | null>(null)
 
-function getStoredAdminToken(): string | null {
-  return localStorage.getItem('admin_token')
-}
-
 export function AdminAuthProvider({ children }: { children: ReactNode }) {
-  const [isAuthenticated, setIsAuthenticated] = useState(() => !!getStoredAdminToken())
+  const [isAuthenticated, setIsAuthenticated] = useState(false)
+  const [loading, setLoading] = useState(false)
 
   const login = useCallback(async (password: string, rememberMe: boolean) => {
-    const res = await apiRequest<{ message: string; access_token: string }>('/api/v1/admin/login', {
-      method: 'POST',
-      body: { password, remember_me: rememberMe },
-      auth: false,
-    })
-    localStorage.setItem('admin_token', res.access_token)
-    setIsAuthenticated(true)
+    setLoading(true)
+    try {
+      await apiRequest<{ message: string }>('/api/v1/admin/login', {
+        method: 'POST',
+        body: { password, remember_me: rememberMe },
+        auth: false,
+      })
+      setIsAuthenticated(true)
+    } finally {
+      setLoading(false)
+    }
   }, [])
 
   const logout = useCallback(async () => {
     try {
-      await apiRequest('/api/v1/admin/logout', {
-        method: 'POST',
-        auth: true,
-        headers: { 'Authorization': `Bearer ${getStoredAdminToken()}` },
-      })
+      await apiRequest('/api/v1/admin/logout', { method: 'POST', auth: false })
     } catch {
       // ignore
     }
-    localStorage.removeItem('admin_token')
     setIsAuthenticated(false)
   }, [])
 
   const checkAuth = useCallback(async (): Promise<boolean> => {
-    const token = getStoredAdminToken()
-    if (!token) {
-      setIsAuthenticated(false)
-      return false
-    }
     try {
-      await apiRequest('/api/v1/admin/settings', {
-        auth: true,
-        headers: { 'Authorization': `Bearer ${token}` },
-      })
+      await apiRequest('/api/v1/admin/settings', { auth: false })
       setIsAuthenticated(true)
       return true
     } catch {
-      localStorage.removeItem('admin_token')
       setIsAuthenticated(false)
       return false
     }
@@ -64,7 +51,7 @@ export function AdminAuthProvider({ children }: { children: ReactNode }) {
 
   return (
     <AdminAuthContext.Provider
-      value={{ isAuthenticated, loading: false, login, logout, checkAuth }}
+      value={{ isAuthenticated, loading, login, logout, checkAuth }}
     >
       {children}
     </AdminAuthContext.Provider>

@@ -2,11 +2,14 @@ import uuid
 from datetime import date, time
 
 from fastapi import HTTPException
-from sqlalchemy import select
+from sqlalchemy import select, text
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.appointment import Appointment, StatusEnum
 from app.models.unavailability import DoctorUnavailability, RecurringEnum
+
+
+from sqlalchemy.orm import selectinload
 
 
 async def validate_and_accept(
@@ -16,9 +19,24 @@ async def validate_and_accept(
     start_time: time,
     end_time: time,
 ) -> Appointment:
+    if end_time <= start_time:
+        raise HTTPException(status_code=400, detail="end_time must be after start_time")
+
+    try:
+        appt_uuid = uuid.UUID(appointment_id)
+    except ValueError:
+        raise HTTPException(status_code=404, detail="Appointment not found")
+
+    await db.execute(text("SELECT pg_advisory_xact_lock(hashtext(:date_str))"), {"date_str": str(target_date)})
+
     result = await db.execute(
         select(Appointment)
-        .where(Appointment.id == uuid.UUID(appointment_id))
+        .where(Appointment.id == appt_uuid)
+        .options(
+            selectinload(Appointment.patient),
+            selectinload(Appointment.service),
+            selectinload(Appointment.prescriptions),
+        )
         .with_for_update()
     )
     appointment = result.scalar_one_or_none()
@@ -31,7 +49,7 @@ async def validate_and_accept(
         select(Appointment).where(
             Appointment.requested_date == target_date,
             Appointment.status == StatusEnum.accepted,
-            Appointment.id != uuid.UUID(appointment_id),
+            Appointment.id != appt_uuid,
         ).with_for_update()
     )
     for a in accepted.scalars().all():
@@ -39,7 +57,7 @@ async def validate_and_accept(
             if a.time_slot_start < end_time and a.time_slot_end > start_time:
                 raise HTTPException(
                     status_code=409,
-                    detail=f"Overlaps with appointment {a.id} ({a.time_slot_start}-{a.time_slot_end})"
+                    detail=f"Overlaps with appointment ({a.time_slot_start}-{a.time_slot_end})"
                 )
 
     all_unavailability = await db.execute(select(DoctorUnavailability))
@@ -56,7 +74,7 @@ async def validate_and_accept(
     appointment.time_slot_end = end_time
     appointment.requested_date = target_date
     await db.commit()
-    await db.refresh(appointment, ["patient", "service"])
+    await db.refresh(appointment, ["patient", "service", "prescriptions"])
     return appointment
 
 
@@ -64,6 +82,8 @@ def _is_unavailable_for_date(
     u: DoctorUnavailability,
     target_date: date,
 ) -> bool:
+    if target_date < u.date:
+        return False
     if u.recurring == RecurringEnum.none:
         return u.date == target_date
     if u.recurring == RecurringEnum.weekly:

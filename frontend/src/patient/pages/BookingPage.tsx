@@ -3,23 +3,19 @@ import { useNavigate } from 'react-router-dom'
 import { apiRequest } from '@shared/api/client'
 import { useToast } from '@shared/context/ToastContext'
 import { ApiError } from '@shared/api/client'
-import type { CalendarResponse, ServiceResponse } from '@shared/types'
+import type { CalendarResponse, UnavailabilitySlot } from '@shared/types'
 import Navbar from '@shared/components/Navbar'
 import Button from '@shared/components/Button'
 import Calendar from '@shared/components/Calendar'
 import CrowdMeter from '@shared/components/CrowdMeter'
-import { CalendarIcon, CheckupIcon, SparkleIcon } from '@shared/components/Icons'
 import ServiceSelector from '@patient/components/ServiceSelector'
-import BookingConfirmation from '@patient/components/BookingConfirmation'
 import styles from './BookingPage.module.css'
 
-type Step = 'service' | 'date' | 'confirm'
 
 export default function BookingPage() {
   const navigate = useNavigate()
   const { toast } = useToast()
 
-  const [step, setStep] = useState<Step>('service')
   const [selectedServiceId, setSelectedServiceId] = useState<string | null>(null)
   const [customDescription, setCustomDescription] = useState('')
   const [selectedDate, setSelectedDate] = useState<string | null>(null)
@@ -30,13 +26,8 @@ export default function BookingPage() {
   const [month, setMonth] = useState(today.getMonth() + 1)
   const [crowdData, setCrowdData] = useState<CalendarResponse['dates']>({})
   const [blockedDates, setBlockedDates] = useState<string[]>([])
-  const [services, setServices] = useState<ServiceResponse[]>([])
-
-  useEffect(() => {
-    apiRequest<ServiceResponse[]>('/api/v1/services', { auth: false })
-      .then(setServices)
-      .catch(() => {})
-  }, [])
+  const [unavailableSlots, setUnavailableSlots] = useState<UnavailabilitySlot[]>([])
+  const [allUnavailableHours, setAllUnavailableHours] = useState<Record<string, UnavailabilitySlot[]>>({})
 
   useEffect(() => {
     const m = `${year}-${month.toString().padStart(2, '0')}`
@@ -44,15 +35,30 @@ export default function BookingPage() {
       .then((data) => {
         setCrowdData(data.dates)
         setBlockedDates(Object.entries(data.dates).filter(([, v]) => v.blocked).map(([k]) => k))
+        const hoursMap: Record<string, UnavailabilitySlot[]> = {}
+        Object.entries(data.dates).forEach(([date, info]) => {
+          if (info.unavailable_hours && info.unavailable_hours.length > 0) {
+            hoursMap[date] = info.unavailable_hours
+          }
+        })
+        setAllUnavailableHours(hoursMap)
       })
       .catch(() => {})
   }, [year, month])
 
-  function getServiceName(id: string | null): string {
-    if (id === '__other__') return customDescription || 'Other'
-    const svc = services.find((s) => s.id === id)
-    return svc?.name || 'Selected service'
-  }
+  useEffect(() => {
+    if (!selectedDate) {
+      setUnavailableSlots([])
+      return
+    }
+    if (allUnavailableHours[selectedDate]) {
+      setUnavailableSlots(allUnavailableHours[selectedDate])
+      return
+    }
+    apiRequest<UnavailabilitySlot[]>(`/api/v1/availability/unavailability?date=${selectedDate}`, { auth: false })
+      .then(setUnavailableSlots)
+      .catch(() => setUnavailableSlots([]))
+  }, [selectedDate, allUnavailableHours])
 
   async function handleConfirm() {
     if (!selectedServiceId || !selectedDate) return
@@ -84,12 +90,7 @@ export default function BookingPage() {
     }
   }
 
-  const steps: { key: Step; label: string; icon: React.ReactNode }[] = [
-    { key: 'service', label: 'Service', icon: <CheckupIcon className={styles.stepIcon} /> },
-    { key: 'date', label: 'Date', icon: <CalendarIcon className={styles.stepIcon} /> },
-    { key: 'confirm', label: 'Confirm', icon: <SparkleIcon className={styles.stepIcon} /> },
-  ]
-  const currentIdx = steps.findIndex((s) => s.key === step)
+
 
   return (
     <>
@@ -97,9 +98,8 @@ export default function BookingPage() {
       <main className={styles.page}>
         <div className={styles.hero}>
           <div className={styles.heroContent}>
-            <span className={styles.heroEyebrow}>Book Appointment</span>
-            <h1 className={styles.heroTitle}>Your smile deserves<br />the best care</h1>
-            <p className={styles.heroSub}>Choose your service, pick a date, and we&apos;ll handle the rest.</p>
+            <h1 className={styles.heroTitle}>Book Your Appointment</h1>
+            <p className={styles.heroSub}>Select a convenient date. Our team will review your request and confirm your time slot.</p>
           </div>
           <div className={styles.heroVisual}>
             <div className={styles.heroShape} />
@@ -109,49 +109,21 @@ export default function BookingPage() {
 
         <div className={styles.container}>
           <div className={styles.progress}>
-            {steps.map((s, i) => (
-              <div key={s.key} className={`${styles.step} ${i <= currentIdx ? styles.active : ''} ${i < currentIdx ? styles.done : ''}`}>
-                <span className={styles.stepNum}>
-                  {i < currentIdx ? (
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
-                  ) : (
-                    i + 1
-                  )}
-                </span>
-                <span className={styles.stepLabel}>{s.label}</span>
-                {i < steps.length - 1 && <span className={styles.stepLine} />}
-              </div>
-            ))}
+            <div className={`${styles.step} ${styles.active}`}>
+              <span className={styles.stepNum}>1</span>
+              <span className={styles.stepLabel}>Choose Date & Service</span>
+            </div>
+            <div className={styles.step}>
+              <span className={styles.stepNum}>2</span>
+              <span className={styles.stepLabel}>Review & Confirm</span>
+            </div>
           </div>
 
           <div className={styles.content}>
-            {step === 'service' && (
-              <div>
-                <h2 className={styles.heading}>Select Service</h2>
-                <p className={styles.headingSub}>What brings you in today?</p>
-                <ServiceSelector
-                  selectedId={selectedServiceId}
-                  onSelect={setSelectedServiceId}
-                  customDescription={customDescription}
-                  onCustomDescription={setCustomDescription}
-                />
-                <div className={styles.actions}>
-                  <Button
-                    variant="primary"
-                    size="default"
-                    disabled={!selectedServiceId}
-                    onClick={() => setStep('date')}
-                  >
-                    Continue
-                  </Button>
-                </div>
-              </div>
-            )}
-
-            {step === 'date' && (
-              <div>
-                <h2 className={styles.heading}>Pick a Date</h2>
-                <p className={styles.headingSub}>Select an available date for your visit</p>
+            <div className={styles.bookingForm}>
+              <div className={styles.formSection}>
+                <h3 className={styles.sectionHeading}>1. Choose a Date</h3>
+                <p className={styles.sectionSub}>Select any date to request your appointment</p>
                 <div className={styles.calendarWrap}>
                   <Calendar
                     year={year}
@@ -162,47 +134,58 @@ export default function BookingPage() {
                     blockedDates={blockedDates}
                     onMonthChange={(y, m) => { setYear(y); setMonth(m) }}
                   />
-                  <CrowdMeter />
-                </div>
-                <div className={styles.actions}>
-                  <Button variant="ghost" size="small" onClick={() => setStep('service')}>
-                    Back
-                  </Button>
-                  <Button
-                    variant="primary"
-                    size="default"
-                    disabled={!selectedDate}
-                    onClick={() => setStep('confirm')}
-                  >
-                    Continue
-                  </Button>
+                  <div className={styles.availabilityPanel}>
+                    <h4 className={styles.panelHeading}>Date Availability</h4>
+                    {selectedDate && <p className={styles.selectedDateText}>{new Date(selectedDate).toLocaleDateString('en-US', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}</p>}
+                    <CrowdMeter />
+                    {unavailableSlots.length > 0 && (
+                      <div className={styles.unavailableNote}>
+                        <span className={styles.unavailableIcon}>⚠</span>
+                        <div>
+                          <strong>Doctor unavailable:</strong>
+                          {unavailableSlots.map((slot, i) => (
+                            <p key={i} className={styles.unavailableTime}>
+                              {slot.start_time?.slice(0, 5)} – {slot.end_time?.slice(0, 5)}
+                              {slot.reason && <span className={styles.unavailableReason}> ({slot.reason})</span>}
+                            </p>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    <div className={styles.infoBox}>
+                      <span className={styles.infoIcon}>🕒</span>
+                      <div>
+                        <strong>Please note:</strong>
+                        <p>You are requesting for the day only. Exact time slot will be assigned after your request is accepted.</p>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
-            )}
 
-            {step === 'confirm' && (
-              <div>
-                <h2 className={styles.heading}>Confirm Booking</h2>
-                <p className={styles.headingSub}>Review your appointment details</p>
-                <BookingConfirmation
-                  serviceName={getServiceName(selectedServiceId)}
-                  date={selectedDate!}
+              <div className={styles.formSection}>
+                <h3 className={styles.sectionHeading}>2. Select the Reason for Visit</h3>
+                <p className={styles.sectionSub}>Choose the main concern or service you need</p>
+                <ServiceSelector
+                  selectedId={selectedServiceId}
+                  onSelect={setSelectedServiceId}
+                  customDescription={customDescription}
+                  onCustomDescription={setCustomDescription}
                 />
-                <div className={styles.actions}>
-                  <Button variant="ghost" size="small" onClick={() => setStep('date')}>
-                    Back
-                  </Button>
-                  <Button
-                    variant="primary"
-                    size="default"
-                    loading={submitting}
-                    onClick={handleConfirm}
-                  >
-                    Confirm Booking
-                  </Button>
-                </div>
               </div>
-            )}
+
+              <div className={styles.actions}>
+                <Button
+                  variant="primary"
+                  size="default"
+                  disabled={!selectedDate || !selectedServiceId || (selectedServiceId === '__other__' && !customDescription)}
+                  loading={submitting}
+                  onClick={handleConfirm}
+                >
+                  Submit Request
+                </Button>
+              </div>
+            </div>
           </div>
         </div>
       </main>

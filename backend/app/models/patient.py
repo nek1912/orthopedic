@@ -1,5 +1,5 @@
 import uuid
-from datetime import date, datetime
+from datetime import date, datetime, timezone
 
 from sqlalchemy import Date, DateTime, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -16,6 +16,6 @@ class Patient(Base):
     name: Mapped[str] = mapped_column(String(255), nullable=False)
     phone: Mapped[str | None] = mapped_column(String(20), nullable=True)
     dob: Mapped[date | None] = mapped_column(Date, nullable=True)
-    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=datetime.now)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
 
     appointments = relationship("Appointment", back_populates="patient")

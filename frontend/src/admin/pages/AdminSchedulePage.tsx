@@ -20,11 +20,14 @@ export default function AdminSchedulePage() {
   const [bookedCount, setBookedCount] = useState<number | null>(null)
   const [loading, setLoading] = useState(true)
   const [showAdd, setShowAdd] = useState(false)
+  const [showFullDay, setShowFullDay] = useState(false)
   const [addDate, setAddDate] = useState('')
   const [addStart, setAddStart] = useState('09:00')
   const [addEnd, setAddEnd] = useState('10:00')
   const [addRecurring, setAddRecurring] = useState('none')
   const [addReason, setAddReason] = useState('')
+  const [fullDayDate, setFullDayDate] = useState('')
+  const [fullDayReason, setFullDayReason] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const { toast } = useToast()
 
@@ -76,6 +79,27 @@ export default function AdminSchedulePage() {
     }
   }
 
+  async function handleFullDay() {
+    if (!fullDayDate) return
+    setSubmitting(true)
+    try {
+      await apiRequest('/api/v1/admin/unavailability', {
+        method: 'POST',
+        body: { date: fullDayDate, start_time: '00:00', end_time: '23:59', recurring: 'none', reason: fullDayReason || null },
+      })
+      toast('Full day blocked', 'success')
+      setShowFullDay(false)
+      setFullDayDate('')
+      setFullDayReason('')
+      fetchEntries()
+    } catch (err) {
+      if (err instanceof ApiError) toast(err.detail, 'error')
+      else toast('Failed to block day', 'error')
+    } finally {
+      setSubmitting(false)
+    }
+  }
+
   async function handleDelete(id: string) {
     try {
       await apiRequest(`/api/v1/admin/unavailability/${id}`, { method: 'DELETE' })
@@ -90,7 +114,10 @@ export default function AdminSchedulePage() {
     <div className={styles.page}>
       <div className={styles.header}>
         <h1 className={styles.title}>Schedule</h1>
-        <Button variant="primary" size="small" onClick={() => setShowAdd(true)}>+ Add</Button>
+        <div className={styles.headerActions}>
+          <Button variant="secondary" size="small" onClick={() => setShowFullDay(true)}>+ Full Day</Button>
+          <Button variant="primary" size="small" onClick={() => setShowAdd(true)}>+ Partial</Button>
+        </div>
       </div>
 
       {bookedCount !== null && (
@@ -113,17 +140,23 @@ export default function AdminSchedulePage() {
 
       {!loading && entries.length > 0 && (
         <div className={styles.list}>
-          {entries.map((e) => (
-            <div key={e.id} className={styles.entry}>
-              <div className={styles.entryInfo}>
-                <span className={styles.entryDate}>{e.date}</span>
-                <span className={styles.entryTime}>{e.start_time} - {e.end_time}</span>
-                {e.recurring !== 'none' && <span className={styles.entryRecurring}>{e.recurring}</span>}
-                {e.reason && <span className={styles.entryReason}>{e.reason}</span>}
+          {entries.map((e) => {
+            const isPast = e.date < localDateISO(new Date())
+            return (
+              <div key={e.id} className={`${styles.entry} ${isPast ? styles.pastEntry : ''}`}>
+                <div className={styles.entryInfo}>
+                  <span className={styles.entryDate}>{e.date}</span>
+                  <span className={styles.entryTime}>{e.start_time} - {e.end_time}</span>
+                  {e.recurring !== 'none' && <span className={styles.entryRecurring}>{e.recurring}</span>}
+                  {e.reason && <span className={styles.entryReason}>{e.reason}</span>}
+                  {isPast && <span className={styles.pastBadge}>Past</span>}
+                </div>
+                {!isPast && (
+                  <button type="button" className={styles.deleteBtn} onClick={() => handleDelete(e.id)} title="Delete">&times;</button>
+                )}
               </div>
-              <button type="button" className={styles.deleteBtn} onClick={() => handleDelete(e.id)} title="Delete">&times;</button>
-            </div>
-          ))}
+            )
+          })}
         </div>
       )}
 
@@ -158,6 +191,23 @@ export default function AdminSchedulePage() {
           <div className={styles.fieldActions}>
             <Button variant="ghost" size="small" onClick={() => setShowAdd(false)}>Cancel</Button>
             <Button variant="primary" size="small" loading={submitting} onClick={handleAdd}>Save</Button>
+          </div>
+        </div>
+      </Modal>
+
+      <Modal open={showFullDay} onClose={() => setShowFullDay(false)} title="Block Full Day">
+        <div className={styles.formBody}>
+          <div className={styles.field}>
+            <label className={styles.fieldLabel}>Date</label>
+            <input type="date" className={styles.fieldInput} value={fullDayDate} onChange={(e) => setFullDayDate(e.target.value)} />
+          </div>
+          <div className={styles.field}>
+            <label className={styles.fieldLabel}>Reason (optional)</label>
+            <input type="text" className={styles.fieldInput} value={fullDayReason} onChange={(e) => setFullDayReason(e.target.value)} placeholder="e.g., Surgery, Holiday" />
+          </div>
+          <div className={styles.fieldActions}>
+            <Button variant="ghost" size="small" onClick={() => setShowFullDay(false)}>Cancel</Button>
+            <Button variant="primary" size="small" loading={submitting} onClick={handleFullDay}>Block Day</Button>
           </div>
         </div>
       </Modal>

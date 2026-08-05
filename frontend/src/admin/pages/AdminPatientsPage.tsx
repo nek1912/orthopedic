@@ -1,14 +1,15 @@
 import { useEffect, useState, useRef, useCallback } from 'react'
 import { apiRequest } from '@shared/api/client'
 import { useToast } from '@shared/context/ToastContext'
-import type { AdminPatientResponse, PatientResponse, AppointmentResponse } from '@shared/types'
-import PatientRow from '@admin/components/PatientRow'
-import Skeleton from '@shared/components/Skeleton'
+import type { AdminPatientResponse, AppointmentResponse } from '@shared/types'
+import PatientList from '@admin/components/PatientList'
+import PatientDetail from '@admin/components/PatientDetail'
+import EditAppointmentModal from '@admin/components/EditAppointmentModal'
 import EmptyState from '@shared/components/EmptyState'
 import styles from './AdminPatientsPage.module.css'
 
-interface PatientDetail {
-  patient: PatientResponse
+interface PatientDetailResponse {
+  patient: AdminPatientResponse
   appointments: AppointmentResponse[]
 }
 
@@ -16,8 +17,10 @@ export default function AdminPatientsPage() {
   const [patients, setPatients] = useState<AdminPatientResponse[]>([])
   const [search, setSearch] = useState('')
   const [loading, setLoading] = useState(true)
-  const [expandedId, setExpandedId] = useState<string | null>(null)
-  const [details, setDetails] = useState<Record<string, AppointmentResponse[]>>({})
+  const [selectedId, setSelectedId] = useState<string | null>(null)
+  const [detail, setDetail] = useState<PatientDetailResponse | null>(null)
+  const [detailLoading, setDetailLoading] = useState(false)
+  const [editModal, setEditModal] = useState<AppointmentResponse | null>(null)
   const { toast } = useToast()
 
   const fetchPatients = useCallback(async (q?: string) => {
@@ -47,59 +50,82 @@ export default function AdminPatientsPage() {
     if (debounceTimer.current) clearTimeout(debounceTimer.current)
   }, [])
 
-  async function toggleExpand(patientId: string) {
-    if (expandedId === patientId) {
-      setExpandedId(null)
-      return
-    }
-    setExpandedId(patientId)
-
-    if (!details[patientId]) {
-      try {
-        const data = await apiRequest<PatientDetail>(`/api/v1/admin/patients/${patientId}`)
-        setDetails((prev) => ({ ...prev, [patientId]: data.appointments }))
-      } catch {
-        toast('Failed to load patient details', 'error')
-      }
+  async function handleSelect(patientId: string) {
+    if (selectedId === patientId) return
+    setSelectedId(patientId)
+    setDetailLoading(true)
+    try {
+      const data = await apiRequest<PatientDetailResponse>(`/api/v1/admin/patients/${patientId}`)
+      setDetail(data)
+    } catch {
+      toast('Failed to load patient details', 'error')
+      setDetail(null)
+    } finally {
+      setDetailLoading(false)
     }
   }
 
+  const selectedPatient = patients.find((p) => p.id === selectedId) || null
+
   return (
     <div className={styles.page}>
-      <h1 className={styles.title}>Patients</h1>
+      <div className={styles.listPanel}>
+        <PatientList
+          patients={patients}
+          selectedId={selectedId}
+          onSelect={handleSelect}
+          search={search}
+          onSearchChange={handleSearch}
+          loading={loading}
+        />
+      </div>
 
-      <input
-        className={styles.searchInput}
-        type="text"
-        placeholder="Search by name or email..."
-        value={search}
-        onChange={(e) => handleSearch(e.target.value)}
-      />
+      <div className={styles.detailPanel}>
+        {!selectedId && !loading && patients.length > 0 && (
+          <div className={styles.emptyState}>
+            <EmptyState heading="Select a patient" subtext="Choose a patient from the list to view their details and appointment history." />
+          </div>
+        )}
 
-      {loading && (
-        <div className={styles.grid}>
-          {[1, 2, 3].map((i) => (
-            <Skeleton key={i} height="4rem" borderRadius="var(--radius-md)" />
-          ))}
-        </div>
-      )}
+        {!loading && patients.length === 0 && (
+          <div className={styles.emptyState}>
+            <EmptyState heading="No patients" subtext="No patients registered yet." />
+          </div>
+        )}
 
-      {!loading && patients.length === 0 && (
-        <EmptyState heading="No patients found" subtext={search ? 'Try a different search' : 'No patients registered yet'} />
-      )}
+        {selectedId && detail && selectedPatient && (
+          <PatientDetail
+            patient={selectedPatient}
+            appointments={detail.appointments}
+            loading={detailLoading}
+            onEditAppointment={(appt) => setEditModal(appt)}
+          />
+        )}
 
-      {!loading && patients.length > 0 && (
-        <div className={styles.grid}>
-          {patients.map((p) => (
-            <PatientRow
-              key={p.id}
-              patient={p}
-              appointments={details[p.id] || []}
-              expanded={expandedId === p.id}
-              onToggle={() => toggleExpand(p.id)}
+        {selectedId && detailLoading && (
+          <div className={styles.emptyState}>
+            <PatientDetail
+              patient={selectedPatient || { id: selectedId, name: '', email: '', phone: null, dob: null, created_at: '', total_visits: 0, last_visit_date: null, pending_count: 0, completed_count: 0, prescription_count: 0 }}
+              appointments={[]}
+              loading={true}
             />
-          ))}
-        </div>
+          </div>
+        )}
+      </div>
+
+      {editModal && (
+        <EditAppointmentModal
+          open={!!editModal}
+          onClose={() => setEditModal(null)}
+          appointment={editModal}
+          onSaved={() => {
+            if (selectedId) {
+              apiRequest<PatientDetailResponse>(`/api/v1/admin/patients/${selectedId}`)
+                .then((data) => setDetail(data))
+                .catch(() => {})
+            }
+          }}
+        />
       )}
     </div>
   )

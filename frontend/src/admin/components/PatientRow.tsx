@@ -7,13 +7,14 @@ interface PatientRowProps {
   appointments?: AppointmentResponse[]
   expanded: boolean
   onToggle: () => void
+  onEditAppointment?: (appt: AppointmentResponse) => void
 }
 
 function formatMonthYear(value: string): string {
   return new Date(value + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', year: 'numeric' })
 }
 
-export default function PatientRow({ patient, appointments = [], expanded, onToggle }: PatientRowProps) {
+export default function PatientRow({ patient, appointments = [], expanded, onToggle, onEditAppointment }: PatientRowProps) {
   const sortedAppointments = [...appointments].sort((a, b) => b.requested_date.localeCompare(a.requested_date))
 
   return (
@@ -80,8 +81,37 @@ export default function PatientRow({ patient, appointments = [], expanded, onTog
                 <div key={a.id} className={styles.timelineRow}>
                   <span className={styles.dot} />
                   <span className={styles.timelineDate}>{formatMonthYear(a.requested_date)}</span>
-                  <span className={styles.timelineService}>{a.service_name || a.service_description || 'General'}</span>
-                  <StatusBadge status={a.status} />
+                  <div className={styles.timelineContent}>
+                    <span className={styles.timelineService}>{a.service_name || a.service_description || 'General Consultation'}</span>
+                    {a.notes && <span className={styles.timelineNotes}>Notes: {a.notes}</span>}
+                    {a.rejection_reason && <span className={styles.timelineReason}>Reason: {a.rejection_reason}</span>}
+                    {a.prescriptions && a.prescriptions.length > 0 && (
+                      <div className={styles.prescriptionBlock}>
+                        <strong className={styles.prescriptionTitle}>Prescription:</strong>
+                        {a.prescriptions.map((p, i) => (
+                          <div key={p.id || i} className={styles.prescriptionItem}>
+                            {p.diagnosis && <div><strong>Diagnosis:</strong> {p.diagnosis}</div>}
+                            {p.medicines && Object.keys(p.medicines).length > 0 && (
+                              <div><strong>Medicines:</strong> {JSON.stringify(p.medicines)}</div>
+                            )}
+                            {p.notes && <div><strong>Notes:</strong> {p.notes}</div>}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                  <div className={styles.timelineActions}>
+                    <StatusBadge status={a.status} />
+                    {a.status === 'completed' && onEditAppointment && (
+                      <button
+                        type="button"
+                        className={styles.editBtn}
+                        onClick={() => onEditAppointment(a)}
+                      >
+                        Edit
+                      </button>
+                    )}
+                  </div>
                 </div>
               ))}
             </div>

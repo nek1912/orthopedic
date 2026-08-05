@@ -19,6 +19,10 @@ from app.schemas.appointment import AppointmentResponse
 router = APIRouter(prefix="/admin/patients", tags=["admin-patients"])
 
 
+def _escape_like(s: str) -> str:
+    return s.replace('%', '\\%').replace('_', '\\_')
+
+
 def _patient_response(p: Patient) -> PatientResponse:
     return PatientResponse(
         id=str(p.id),
@@ -84,6 +88,16 @@ def _appointment_response(a) -> AppointmentResponse:
         notes=a.notes,
         created_at=a.created_at,
         updated_at=a.updated_at,
+        prescriptions=[
+            {
+                "id": str(p.id),
+                "diagnosis": p.diagnosis,
+                "medicines": p.medicines,
+                "notes": p.notes,
+                "created_at": p.created_at.isoformat() if p.created_at else None,
+            }
+            for p in getattr(a, "prescriptions", [])
+        ]
     )
 
 
@@ -95,8 +109,9 @@ async def list_patients(
 ):
     query = select(Patient)
     if search:
+        escaped = _escape_like(search)
         query = query.where(
-            Patient.name.ilike(f"%{search}%") | Patient.email.ilike(f"%{search}%")
+            Patient.name.ilike(f"%{escaped}%", escape='\\') | Patient.email.ilike(f"%{escaped}%", escape='\\')
         )
     query = query.order_by(Patient.created_at.desc())
     patients = (await db.execute(query)).scalars().all()
@@ -142,7 +157,10 @@ async def get_patient_detail(
     result = await db.execute(
         select(Patient)
         .where(Patient.id == uuid.UUID(patient_id))
-        .options(selectinload(Patient.appointments))
+        .options(
+            selectinload(Patient.appointments).selectinload(Appointment.service),
+            selectinload(Patient.appointments).selectinload(Appointment.prescriptions),
+        )
     )
     patient = result.scalar_one_or_none()
     if patient is None:
