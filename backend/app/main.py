@@ -33,6 +33,8 @@ async def lifespan(app: FastAPI):
     from app.core.database import async_session_factory
     from app.core.security import get_password_hash
     from app.models.admin import AdminSettings
+    from app.models.service import Service
+    import uuid
 
     async with async_session_factory() as session:
         result = await session.execute(select(AdminSettings).where(AdminSettings.id == 1))
@@ -43,6 +45,30 @@ async def lifespan(app: FastAPI):
                 password_hash=get_password_hash("admin123"),
             ))
             await session.commit()
+
+    SERVICES = [
+        {"name": "Joint Replacement", "description": "Hip, Knee, Shoulder Consultation & Surgery"},
+        {"name": "Sports Injury & Arthroscopy", "description": "Minimally Invasive Ligament & Joint Repair"},
+        {"name": "Fracture & Trauma Care", "description": "Bone Setting, Casting & Emergency Care"},
+        {"name": "Spine & Back Pain Care", "description": "Disc, Vertebral & Sciatica Management"},
+        {"name": "Arthritis & Pain Relief", "description": "Joint Injections, Pain Therapy & Care"},
+        {"name": "Rehab & Mobility Check", "description": "Post-op Physical Therapy & Alignment"},
+    ]
+
+    async with async_session_factory() as session:
+        result = await session.execute(select(Service))
+        existing = {s.name for s in result.scalars().all()}
+        for svc in SERVICES:
+            if svc["name"] not in existing:
+                session.add(Service(
+                    id=uuid.uuid4(),
+                    name=svc["name"],
+                    description=svc["description"],
+                    duration_minutes=30,
+                    default_fee=0.0,
+                    is_active=True,
+                ))
+        await session.commit()
 
     yield
     await engine.dispose()
