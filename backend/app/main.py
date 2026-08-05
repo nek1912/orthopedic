@@ -28,6 +28,22 @@ async def lifespan(app: FastAPI):
                 await conn.execute(text(ddl))
             except Exception:
                 pass
+
+    from sqlalchemy import select
+    from app.core.database import async_session_factory
+    from app.core.security import get_password_hash
+    from app.models.admin import AdminSettings
+
+    async with async_session_factory() as session:
+        result = await session.execute(select(AdminSettings).where(AdminSettings.id == 1))
+        if result.scalar_one_or_none() is None:
+            session.add(AdminSettings(
+                id=1,
+                email="admin@apexortho.com",
+                password_hash=get_password_hash("admin123"),
+            ))
+            await session.commit()
+
     yield
     await engine.dispose()
 
