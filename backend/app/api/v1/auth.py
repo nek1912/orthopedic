@@ -6,12 +6,13 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.database import get_db
 from app.core.security import create_access_token, create_refresh_token, decode_token
 from app.models.patient import Patient
-from app.schemas.auth import AuthResponse, LoginRequest, PatientResponse, RefreshRequest, RegisterRequest
+from app.schemas.auth import AuthResponse, LoginRequest, PatientResponse, ProfileUpdate, RefreshRequest, RegisterRequest
 from app.services.auth_service import (
     authenticate_patient,
     create_patient_tokens,
     register_patient,
 )
+from app.core.security import get_current_patient
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
@@ -98,4 +99,30 @@ async def refresh(request: RefreshRequest, db: AsyncSession = Depends(get_db)):
         access_token=tokens["access_token"],
         refresh_token=tokens["refresh_token"],
         token_type=tokens["token_type"],
+    )
+
+
+@router.patch("/profile", response_model=PatientResponse)
+async def update_profile(
+    profile: ProfileUpdate,
+    current_patient: Patient = Depends(get_current_patient),
+    db: AsyncSession = Depends(get_db),
+):
+    if profile.name is not None:
+        current_patient.name = profile.name
+    if profile.phone is not None:
+        current_patient.phone = profile.phone
+    if profile.dob is not None:
+        current_patient.dob = profile.dob
+
+    await db.commit()
+    await db.refresh(current_patient)
+
+    return PatientResponse(
+        id=str(current_patient.id),
+        name=current_patient.name,
+        email=current_patient.email,
+        phone=current_patient.phone,
+        dob=current_patient.dob,
+        created_at=current_patient.created_at,
     )

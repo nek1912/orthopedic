@@ -1,17 +1,17 @@
 services:
   postgres:
     image: postgres:16
-    container_name: dental-clinic-db
+    container_name: orthopedic-clinic-db
     ports:
       - "5432:5432"
     environment:
-      POSTGRES_USER: dental_dev
-      POSTGRES_PASSWORD: dental_dev_pass
-      POSTGRES_DB: dental_clinic_dev
+      POSTGRES_USER: orthopedic_dev
+      POSTGRES_PASSWORD: orthopedic_dev_pass
+      POSTGRES_DB: orthopedic_clinic_dev
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U dental_dev -d dental_clinic_dev"]
+      test: ["CMD-SHELL", "pg_isready -U orthopedic_dev -d orthopedic_clinic_dev"]
       interval: 10s
       timeout: 5s
       retries: 5

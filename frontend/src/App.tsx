@@ -10,7 +10,7 @@ import LandingPage from '@patient/pages/LandingPage'
 import LoginPage from '@patient/pages/LoginPage'
 import RegisterPage from '@patient/pages/RegisterPage'
 import BookingPage from '@patient/pages/BookingPage'
-import MyAppointmentsPage from '@patient/pages/MyAppointmentsPage'
+import ProfilePage from '@patient/pages/ProfilePage'
 import AdminLoginPage from '@admin/pages/AdminLoginPage'
 
 const AdminDashboard = lazy(() => import('@admin/pages/AdminDashboard'))
@@ -28,7 +28,8 @@ export default function App() {
 
           <Route element={<PatientRoute />}>
             <Route path="/book" element={<BookingPage />} />
-            <Route path="/my-appointments" element={<MyAppointmentsPage />} />
+            <Route path="/profile" element={<ProfilePage />} />
+            <Route path="/my-appointments" element={<ProfilePage />} />
           </Route>
 
           <Route element={<AdminRoute />}>

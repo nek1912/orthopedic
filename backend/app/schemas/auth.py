@@ -29,6 +29,12 @@ class PatientResponse(BaseModel):
     created_at: datetime
 
 
+class ProfileUpdate(BaseModel):
+    name: str | None = None
+    phone: str | None = None
+    dob: date | None = None
+
+
 class AuthResponse(BaseModel):
     patient: PatientResponse
     access_token: str
