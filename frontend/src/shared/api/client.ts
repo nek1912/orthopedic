@@ -26,7 +26,7 @@ export function setTokenGetter(fn: () => string | null) {
 
 function getAuthToken(path?: string): string | null {
   if (path?.startsWith('/api/v1/admin')) {
-    return null
+    return localStorage.getItem('admin_token')
   }
   return getToken()
 }

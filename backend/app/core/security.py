@@ -72,11 +72,12 @@ async def get_current_admin(
     response: Response,
     db: AsyncSession = Depends(get_db),
 ) -> AdminSettings:
-    token = request.cookies.get(settings.ADMIN_COOKIE_NAME)
+    token = None
+    auth_header = request.headers.get("Authorization", "")
+    if auth_header.startswith("Bearer "):
+        token = auth_header[7:]
     if token is None:
-        auth_header = request.headers.get("Authorization", "")
-        if auth_header.startswith("Bearer "):
-            token = auth_header[7:]
+        token = request.cookies.get(settings.ADMIN_COOKIE_NAME)
     if token is None:
         raise HTTPException(status_code=401, detail="Not authenticated")
     payload = decode_token(token)
@@ -92,25 +93,4 @@ async def get_current_admin(
     token_version = payload.get("token_version", 0)
     if token_version != (admin.token_version or 0):
         raise HTTPException(status_code=401, detail="Session invalidated")
-    remember_me = payload.get("remember_me", False)
-    exp = payload.get("exp")
-    if exp:
-        exp_dt = datetime.fromtimestamp(exp, tz=timezone.utc)
-        now = datetime.now(timezone.utc)
-        remaining = exp_dt - now
-        total = timedelta(days=30 if remember_me else 1)
-        if remaining > total * 0.25:
-            return admin
-    max_age = 30 * 24 * 60 * 60 if remember_me else 24 * 60 * 60
-    from app.services.auth_service import create_admin_token
-    new_token = create_admin_token(int(admin_id), remember_me, token_version=admin.token_version or 0)["access_token"]
-    response.set_cookie(
-        key=settings.ADMIN_COOKIE_NAME,
-        value=new_token,
-        httponly=True,
-        samesite="lax",
-        secure=settings.cookie_secure,
-        max_age=max_age,
-        path="/",
-    )
     return admin

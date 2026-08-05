@@ -25,18 +25,11 @@ async def admin_login(
         raise HTTPException(status_code=401, detail="Invalid credentials")
 
     token_data = create_admin_token(admin.id, remember_me=login_request.remember_me, token_version=admin.token_version or 0)
-    max_age = 30 * 24 * 60 * 60 if login_request.remember_me else 24 * 60 * 60
 
-    response.set_cookie(
-        key=settings.ADMIN_COOKIE_NAME,
-        value=token_data["access_token"],
-        httponly=True,
-        samesite="lax",
-        secure=settings.cookie_secure,
-        max_age=max_age,
-        path="/",
+    return AdminLoginResponse(
+        message="Login successful",
+        access_token=token_data["access_token"],
     )
-    return AdminLoginResponse(message="Login successful")
 
 
 @router.post("/logout")
